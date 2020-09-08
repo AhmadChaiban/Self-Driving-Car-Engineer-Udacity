@@ -8,40 +8,46 @@ def img_pipeline(img):
 
     pers_transform, M, src = corners_unwarp(img)
 
+    binary_img = get_s_channel(pers_transform)
 
+    converted_img = apply_gradient(binary_img)
 
-    hls_img = cv2.cvtColor(pers_transform, cv2.COLOR_RGB2HLS)
+    filtered_img = cv2.GaussianBlur(converted_img, (3, 3), 0)
 
-    S = hls_img[:, :, 2]
+    hist = lane_histogram(filtered_img)
 
-    thresh = (90, 255)
-    binary = np.zeros_like(S)
-    binary[(S > thresh[0]) & (S <= thresh[1])] = 1
+    leftx, lefty, rightx, righty, sliding_windows_img = apply_sliding_window(filtered_img)
 
-    # plt.imshow(binary)
+    poly_fit_img = fit_polynomial(leftx, lefty, rightx, righty, sliding_windows_img)
+
+    return poly_fit_img
+    # plt.imshow(poly_fit_img)
+    # plt.show()
+
+    # plt.figure(figsize = (5, 5))
+    #
+    # plt.figure(1)
+    # plt.subplot(211)
+    # plt.imshow(undistorted_img)
+    # plt.scatter(src[:, 0], src[:, 1], color = 'red')
+    #
+    # plt.subplot(212)
+    # plt.imshow(pers_transform)
     # plt.show()
     #
-    converted_img = apply_gradient(binary)
-    #
-    plt.figure(figsize = (5, 5))
-
-    plt.figure(1)
-    plt.subplot(211)
-    plt.imshow(undistorted_img)
-    plt.scatter(src[:, 0], src[:, 1], color = 'red')
-
-    plt.subplot(212)
-    plt.imshow(pers_transform)
-    plt.show()
-
-    plt.figure(figsize = (10,10))
-    plt.imshow(converted_img)
-    plt.show()
+    # plt.figure(figsize = (10,10))
+    # plt.imshow(filtered_img, cmap="gray")
+    # plt.show()
 
 if __name__ == '__main__':
 
-    img = cv2.imread('./test_images/straight_lines2.jpg')
+    img = cv2.imread('./test_images/test4.jpg')
     img_pipeline(img)
+
+    white_output = 'output_images/project_video.mp4'
+    clip1 = VideoFileClip("videos/project_video.mp4")
+    white_clip = clip1.fl_image(img_pipeline)
+    white_clip.write_videofile(white_output, audio=False)
 
 
 
