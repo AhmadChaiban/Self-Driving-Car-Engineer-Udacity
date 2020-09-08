@@ -36,7 +36,6 @@ def undistort_image(img):
 
 def corners_unwarp(undist_img):
     gray = cv2.cvtColor(undist_img, cv2.COLOR_BGR2GRAY)
-    print(undist_img.shape)
     img_height, img_width = undist_img.shape[0], undist_img.shape[1]
 
     offset = 600
