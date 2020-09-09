@@ -35,21 +35,21 @@ def undistort_image(img):
     return undist
 
 def corners_unwarp(undist_img):
-    gray = cv2.cvtColor(undist_img, cv2.COLOR_BGR2GRAY)
+    # gray = cv2.cvtColor(undist_img, cv2.COLOR_BGR2GRAY)
     img_height, img_width = undist_img.shape[0], undist_img.shape[1]
 
-    offset = 600
-    img_size = (gray.shape[1], gray.shape[0])
+    offset = 500
+    img_size = (undist_img.shape[1], undist_img.shape[0])
 
-    src = np.float32([[0.2*img_width, img_height*0.90],
-                    [0.45*img_width, 440],
-                    [0.55*img_width, 440],
-                    [0.8*img_width, img_height*0.90]])
+    src = np.float32([[0.2*img_width, img_height*0.95],
+                    [0.45*img_width, 450],
+                    [0.55*img_width, 450],
+                    [0.8*img_width, img_height*0.95]])
 
-    dst = np.float32([[0.2*img_width, img_height*0.90],
-                      [0.45*img_width - offset, 440 - offset],
-                      [0.55*img_width + offset, 440 - offset],
-                      [0.8*img_width, img_height*0.90]])
+    dst = np.float32([[0.2*img_width, img_height*0.95],
+                      [0.45*img_width - offset, 450 - offset],
+                      [0.55*img_width + offset, 450 - offset],
+                      [0.8*img_width, img_height*0.95]])
 
     M = cv2.getPerspectiveTransform(src, dst)
     warped = cv2.warpPerspective(undist_img, M, img_size)
@@ -61,11 +61,11 @@ def get_s_channel(pers_tranformed_img):
 
     S = hls_img[:, :, 2]
 
-    thresh = (120, 255)
+    thresh = (170, 255)
     binary = np.zeros_like(S)
     binary[(S > thresh[0]) & (S <= thresh[1])] = 1
 
-    return binary
+    return binary, hls_img[:, :, 1]
 
 def abs_sobel_thresh(img, orient='x', sobel_kernel=3, thresh=(0, 255)):
     # Calculate directional gradient
@@ -106,18 +106,22 @@ def dir_threshold(image, sobel_kernel=3, thresh=(0, np.pi/2)):
     dir_binary[(grad_direction >= thresh[0]) & (grad_direction <= thresh[1])] = 1
     return dir_binary
 
-def apply_gradient(gray):
+def apply_gradient(undistorted_img, binary_S_img, L_channel):
     # Choose a Sobel kernel size
     ksize = 3 # Choose a larger odd number to smooth gradient measurements
     # Apply each of the thresholding functions
-    gradx = abs_sobel_thresh(gray, orient='x', sobel_kernel=ksize, thresh=(25, 255))
-    grady = abs_sobel_thresh(gray, orient='y', sobel_kernel=ksize, thresh=(25, 255))
-    mag_binary = mag_thresh(gray, sobel_kernel=ksize, mag_thresh=(25, 255))
-    dir_binary = dir_threshold(gray, sobel_kernel=ksize, thresh=(0, np.pi/2))
+    gradx = abs_sobel_thresh(L_channel, orient='x', sobel_kernel=ksize, thresh=(20, 100))
+    # grady = abs_sobel_thresh(L_channel, orient='y', sobel_kernel=ksize, thresh=(90, 250))
+    # mag_binary = mag_thresh(L_channel, sobel_kernel=ksize, mag_thresh=(90, 255))
+    # dir_binary = dir_threshold(L_channel, sobel_kernel=ksize, thresh=(0.7, 1.3))
 
-    combined = np.zeros_like(dir_binary)
-    combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1))] = 1
-    return combined
+    # combined = np.zeros_like(dir_binary)
+    # combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1))] = 1
+
+    combined_binary = np.zeros_like(gradx)
+    combined_binary[(gradx == 1) | (binary_S_img == 1)] = 1
+
+    return combined_binary
 
 def lane_histogram(img):
     y = int(len(img)/2)
@@ -130,7 +134,7 @@ def lane_histogram(img):
 
 def apply_sliding_window(filtered_img):
     out_img = np.dstack((filtered_img, filtered_img, filtered_img))
-    histogram = np.sum(filtered_img[filtered_img.shape[0]//2:,:], axis=0)
+    histogram = np.sum(filtered_img[filtered_img.shape[0]//2:, :], axis=0)
 
     midpoint = np.int(histogram.shape[0]//2)
     leftx_base = np.argmax(histogram[:midpoint])
@@ -213,5 +217,25 @@ def fit_polynomial(leftx, lefty, rightx, righty, sliding_windows_img):
     plt.plot(left_fitx, ploty, color='yellow')
     plt.plot(right_fitx, ploty, color='yellow')
 
-    return sliding_windows_img
+    return sliding_windows_img, left_fitx, right_fitx, ploty
+
+def project_to_video(pers_transform, undistorted_img, left_fitx, right_fitx, ploty, M, src):
+    # Create an image to draw the lines on
+    warp_zero = np.zeros_like(pers_transform).astype(np.uint8)
+    color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
+
+    # Recast the x and y points into usable format for cv2.fillPoly()
+    pts_left = np.array([np.transpose(np.vstack([left_fitx, ploty]))])
+    pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fitx, ploty])))])
+    pts = np.hstack((pts_left, pts_right))
+
+    # Draw the lane onto the warped blank image
+    cv2.fillPoly(color_warp, np.int32([pts]), (0, 255, 0))
+
+    # Warp the blank back to original image space using inverse perspective matrix (Minv)
+    newwarp = cv2.warpPerspective(color_warp, np.linalg.inv(M), (undistorted_img.shape[1], undistorted_img.shape[0]))
+    # Combine the result with the original image
+    result = cv2.addWeighted(undistorted_img, 1, newwarp, 0.3, 0)
+
+    return result
 
