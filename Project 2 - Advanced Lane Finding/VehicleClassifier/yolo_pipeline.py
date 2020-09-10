@@ -79,7 +79,8 @@ class yolo_tf:
 
         conv = tf.nn.conv2d(inputs_pad, weight, strides=[1, stride, stride, 1], padding='VALID',name=str(idx)+'_conv')
         conv_biased = tf.add(conv,biases,name=str(idx)+'_conv_biased')
-        print('Layer  %d : Type = Conv, Size = %d * %d, Stride = %d, Filters = %d, Input channels = %d' % (idx,size,size,stride,filters,int(channels)))
+        print('Layer  %d : Type = Conv, Size = %d * %d, Stride = %d, Filters = %d, Input channels =\
+         %d' % (idx,size,size,stride,filters,int(channels)))
         return tf.maximum(self.alpha*conv_biased,conv_biased,name=str(idx)+'_leaky_relu')
 
     def pooling_layer(self,idx,inputs,size,stride):
@@ -97,7 +98,8 @@ class yolo_tf:
             inputs_processed = inputs
         weight = tf.Variable(tf.truncated_normal([dim,hiddens], stddev=0.1))
         biases = tf.Variable(tf.constant(0.1, shape=[hiddens]))
-        print ('Layer  %d : Type = Full, Hidden = %d, Input dimension = %d, Flat = %d, Activation = %d' % (idx,hiddens,int(dim),int(flat),1-int(linear))	)
+        print('Layer  %d : Type = Full, Hidden = %d, Input dimension = %d,\
+         Flat = %d, Activation = %d' % (idx,hiddens,int(dim),int(flat),1-int(linear)))
         if linear : return tf.add(tf.matmul(inputs_processed,weight),biases,name=str(idx)+'_fc')
         ip = tf.add(tf.matmul(inputs_processed,weight),biases)
         return tf.maximum(self.alpha*ip,ip,name=str(idx)+'_fc')
@@ -193,7 +195,7 @@ def draw_results(img, image_lane, yolo, fps):
             window_list.append(((x-w,y-h),(x+w,y+h)))
 
     # draw vehicle thumbnails
-    draw_thumbnails(img_cp, img, window_list)
+    # draw_thumbnails(img_cp, img, window_list)
 
     # draw speed
     # draw_speed(img_cp, fps, yolo.w_img)

@@ -42,7 +42,7 @@ def draw_thumbnails(img_cp, img, window_list, thumb_w=100, thumb_h=80, off_x=30,
 
 def draw_background_highlight(image, draw_img, w):
 
-    mask = cv2.rectangle(np.copy(image), (0, 0), (w, 155), (0, 0, 0), thickness=cv2.FILLED)
+    mask = cv2.rectangle(np.copy(image), (0, 0), (w, 0), (0, 0, 0), thickness=0)#cv2.FILLED) #(0, 0), (w, 155), (0, 0, 0)
     draw_img = cv2.addWeighted(src1=mask, alpha=0.3, src2=draw_img, beta=0.8, gamma=0)
 
     return draw_img
