@@ -68,16 +68,16 @@ if __name__ == '__main__':
     white_clip = clip1.fl_image(img_pipeline)
     clip = white_clip.fl_image(pipeline_yolo)
     clip.write_videofile(white_output, audio=False)
-
-    white_output = 'output_images/challenge_video.mp4'
-    clip1 = VideoFileClip("videos/challenge_video.mp4")
-    white_clip = clip1.fl_image(img_pipeline)
-    clip = white_clip.fl_image(pipeline_yolo)
-    clip.write_videofile(white_output, audio=False)
-
-    white_output = 'output_images/harder_challenge_video.mp4'
-    clip1 = VideoFileClip("videos/harder_challenge_video.mp4")
-    white_clip = clip1.fl_image(img_pipeline)
-    clip = white_clip.fl_image(pipeline_yolo)
-    clip.write_videofile(white_output, audio=False)
+    #
+    # white_output = 'output_images/challenge_video.mp4'
+    # clip1 = VideoFileClip("videos/challenge_video.mp4")
+    # white_clip = clip1.fl_image(img_pipeline)
+    # clip = white_clip.fl_image(pipeline_yolo)
+    # clip.write_videofile(white_output, audio=False)
+    #
+    # white_output = 'output_images/harder_challenge_video.mp4'
+    # clip1 = VideoFileClip("videos/harder_challenge_video.mp4")
+    # white_clip = clip1.fl_image(img_pipeline)
+    # clip = white_clip.fl_image(pipeline_yolo)
+    # clip.write_videofile(white_output, audio=False)
 
