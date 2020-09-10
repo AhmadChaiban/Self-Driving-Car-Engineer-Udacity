@@ -15,7 +15,7 @@ class PolyFitter:
         histogram = sum(bottom_half)
         return histogram
 
-    def apply_sliding_window(self, filtered_img, nwindows=9, margin=100, minpix=50):
+    def apply_sliding_window(self, filtered_img, nwindows=9, margin=150, minpix=50):
         out_img = np.dstack((filtered_img, filtered_img, filtered_img))
         histogram = np.sum(filtered_img[filtered_img.shape[0]//2:, :], axis=0)
 

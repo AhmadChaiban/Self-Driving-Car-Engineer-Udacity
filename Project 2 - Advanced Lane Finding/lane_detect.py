@@ -36,6 +36,7 @@ def img_pipeline(img):
     result = project_to_video(pers_transform, undistorted_img, left_fitx, right_fitx, ploty, M, src)
 
     return result
+    # return sliding_windows_img
     # return poly_fit_img
 
 
@@ -58,26 +59,28 @@ def img_pipeline(img):
     plt.imshow(result)
     plt.show()
 
+    # return result
+
 if __name__ == '__main__':
 
     # img = cv2.imread('./test_images/test4.jpg')
     # img_pipeline(img)
 
     white_output = 'output_images/project_video.mp4'
-    clip1 = VideoFileClip("videos/project_video.mp4")
+    clip1 = VideoFileClip("videos/project_video.mp4")#.subclip(21, 24)
     white_clip = clip1.fl_image(img_pipeline)
     clip = white_clip.fl_image(pipeline_yolo)
     clip.write_videofile(white_output, audio=False)
-    #
-    # white_output = 'output_images/challenge_video.mp4'
-    # clip1 = VideoFileClip("videos/challenge_video.mp4")
-    # white_clip = clip1.fl_image(img_pipeline)
-    # clip = white_clip.fl_image(pipeline_yolo)
-    # clip.write_videofile(white_output, audio=False)
-    #
-    # white_output = 'output_images/harder_challenge_video.mp4'
-    # clip1 = VideoFileClip("videos/harder_challenge_video.mp4")
-    # white_clip = clip1.fl_image(img_pipeline)
-    # clip = white_clip.fl_image(pipeline_yolo)
-    # clip.write_videofile(white_output, audio=False)
+
+    white_output = 'output_images/challenge_video.mp4'
+    clip1 = VideoFileClip("videos/challenge_video.mp4")
+    white_clip = clip1.fl_image(img_pipeline)
+    clip = white_clip.fl_image(pipeline_yolo)
+    clip.write_videofile(white_output, audio=False)
+
+    white_output = 'output_images/harder_challenge_video.mp4'
+    clip1 = VideoFileClip("videos/harder_challenge_video.mp4")
+    white_clip = clip1.fl_image(img_pipeline)
+    clip = white_clip.fl_image(pipeline_yolo)
+    clip.write_videofile(white_output, audio=False)
 

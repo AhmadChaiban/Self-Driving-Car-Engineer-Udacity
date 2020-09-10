@@ -36,21 +36,21 @@ class CameraCalibrator:
         undist = cv2.undistort(img, mtx, dist, None, mtx)
         return undist
 
-    def corners_unwarp(self, undist_img, offset = 500):
+    def corners_unwarp(self, undist_img, offset = 400):
         # gray = cv2.cvtColor(undist_img, cv2.COLOR_BGR2GRAY)
         img_height, img_width = undist_img.shape[0], undist_img.shape[1]
 
         img_size = (undist_img.shape[1], undist_img.shape[0])
 
-        src = np.float32([[0.2*img_width, img_height*0.95],
-                          [0.45*img_width, 450],
-                          [0.55*img_width, 450],
-                          [0.8*img_width, img_height*0.95]])
+        src = np.float32([[0.15*img_width, img_height*0.95],
+                          [0.45*img_width, 455],
+                          [0.55*img_width, 455],
+                          [0.85*img_width, img_height*0.95]])
 
-        dst = np.float32([[0.2*img_width, img_height*0.95],
-                          [0.45*img_width - offset, 450 - offset],
-                          [0.55*img_width + offset, 450 - offset],
-                          [0.8*img_width, img_height*0.95]])
+        dst = np.float32([[0.15*img_width, img_height*0.95],
+                          [0.45*img_width - offset, 455 - offset],
+                          [0.55*img_width + offset, 455 - offset],
+                          [0.85*img_width, img_height*0.95]])
 
         M = cv2.getPerspectiveTransform(src, dst)
         warped = cv2.warpPerspective(undist_img, M, img_size)
