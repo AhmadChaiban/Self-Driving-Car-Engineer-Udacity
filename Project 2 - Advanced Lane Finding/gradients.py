@@ -57,7 +57,7 @@ class GradientApplier:
 
     def apply_gradient(self, undistorted_img, binary_S_img, L_channel):
         # Choose a Sobel kernel size
-        ksize = 3 # Choose a larger odd number to smooth gradient measurements
+        ksize = 11 # Choose a larger odd number to smooth gradient measurements
         # Apply each of the thresholding functions
         gradx = self.abs_sobel_thresh(L_channel, orient='x', sobel_kernel=ksize, thresh=(20, 100))
         # grady = self.abs_sobel_thresh(L_channel, orient='y', sobel_kernel=ksize, thresh=(90, 250))

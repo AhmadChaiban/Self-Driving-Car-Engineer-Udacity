@@ -29,9 +29,11 @@ def img_pipeline(img):
 
     # filtered_img = cv2.GaussianBlur(pers_transform, (3, 3), 0)
 
-    leftx, lefty, rightx, righty, sliding_windows_img = poly_fitter.apply_sliding_window(pers_transform)
-
-    poly_fit_img, left_fitx, right_fitx, ploty = poly_fitter.fit_polynomial(leftx, lefty, rightx, righty, sliding_windows_img)
+    try:
+        sliding_windows_img, left_fitx, right_fitx, ploty = poly_fitter.search_around_poly(pers_transform)
+    except:
+        leftx, lefty, rightx, righty, sliding_windows_img = poly_fitter.apply_sliding_window(pers_transform)
+        poly_fit_img,  left_fitx, right_fitx, ploty = poly_fitter.fit_polynomial(leftx, lefty, rightx, righty, sliding_windows_img)
 
     result = project_to_video(pers_transform, undistorted_img, left_fitx, right_fitx, ploty, M, src)
 
@@ -67,20 +69,20 @@ if __name__ == '__main__':
     # img_pipeline(img)
 
     white_output = 'output_images/project_video.mp4'
-    clip1 = VideoFileClip("videos/project_video.mp4")#.subclip(21, 24)
+    clip1 = VideoFileClip("videos/project_video.mp4")#.subclip(18, 24)
     white_clip = clip1.fl_image(img_pipeline)
     clip = white_clip.fl_image(pipeline_yolo)
     clip.write_videofile(white_output, audio=False)
 
-    white_output = 'output_images/challenge_video.mp4'
-    clip1 = VideoFileClip("videos/challenge_video.mp4")
-    white_clip = clip1.fl_image(img_pipeline)
-    clip = white_clip.fl_image(pipeline_yolo)
-    clip.write_videofile(white_output, audio=False)
-
-    white_output = 'output_images/harder_challenge_video.mp4'
-    clip1 = VideoFileClip("videos/harder_challenge_video.mp4")
-    white_clip = clip1.fl_image(img_pipeline)
-    clip = white_clip.fl_image(pipeline_yolo)
-    clip.write_videofile(white_output, audio=False)
-
+    # white_output = 'output_images/challenge_video.mp4'
+    # clip1 = VideoFileClip("videos/challenge_video.mp4")
+    # white_clip = clip1.fl_image(img_pipeline)
+    # clip = white_clip.fl_image(pipeline_yolo)
+    # clip.write_videofile(white_output, audio=False)
+    #
+    # white_output = 'output_images/harder_challenge_video.mp4'
+    # clip1 = VideoFileClip("videos/harder_challenge_video.mp4")
+    # white_clip = clip1.fl_image(img_pipeline)
+    # clip = white_clip.fl_image(pipeline_yolo)
+    # clip.write_videofile(white_output, audio=False)
+    #

@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 
 class PolyFitter:
     def __init__(self):
-        pass
+        self.left_fit = None
+        self.right_fit = None
 
     def lane_histogram(self, img):
         y = int(len(img)/2)
@@ -15,7 +16,7 @@ class PolyFitter:
         histogram = sum(bottom_half)
         return histogram
 
-    def apply_sliding_window(self, filtered_img, nwindows=9, margin=150, minpix=50):
+    def apply_sliding_window(self, filtered_img, nwindows=9, margin=100, minpix=50):
         out_img = np.dstack((filtered_img, filtered_img, filtered_img))
         histogram = np.sum(filtered_img[filtered_img.shape[0]//2:, :], axis=0)
 
@@ -80,6 +81,9 @@ class PolyFitter:
         left_fit = np.polyfit(lefty, leftx, deg = 2)
         right_fit = np.polyfit(righty, rightx, deg = 2)
 
+        self.left_fit = left_fit
+        self.right_fit = right_fit
+
         ploty = np.linspace(0, sliding_windows_img.shape[0]-1, sliding_windows_img.shape[0])
         try:
             left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
@@ -97,3 +101,62 @@ class PolyFitter:
         plt.plot(right_fitx, ploty, color='yellow')
 
         return sliding_windows_img, left_fitx, right_fitx, ploty
+
+    def search_around_poly(self, binary_warped, margin=30):
+
+        nonzero = binary_warped.nonzero()
+        nonzeroy = np.array(nonzero[0])
+        nonzerox = np.array(nonzero[1])
+
+        left_constraint1 = self.left_fit[0]*nonzeroy**2 + self.left_fit[1]*nonzeroy + self.left_fit[2] - margin
+        left_constraint2 = self.left_fit[0]*nonzeroy**2 + self.left_fit[1]*nonzeroy + self.left_fit[2] + margin
+        right_constraint1 = self.right_fit[0]*nonzeroy**2 + self.right_fit[1]*nonzeroy + self.right_fit[2] - margin
+        right_constraint2 = self.right_fit[0]*nonzeroy**2 + self.right_fit[1]*nonzeroy + self.right_fit[2] + margin
+
+        left_lane_inds = ((nonzerox >= left_constraint1) & (nonzerox <= left_constraint2))
+        right_lane_inds = ((nonzerox >= right_constraint1) & (nonzerox <= right_constraint2))
+
+        leftx = nonzerox[left_lane_inds]
+        lefty = nonzeroy[left_lane_inds]
+        rightx = nonzerox[right_lane_inds]
+        righty = nonzeroy[right_lane_inds]
+
+        left_fitx, right_fitx, ploty = self.fit_poly(binary_warped.shape, leftx, lefty, rightx, righty)
+
+        out_img = np.dstack((binary_warped, binary_warped, binary_warped))*255
+        window_img = np.zeros_like(out_img)
+        # Color in left and right line pixels
+        out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = [255, 0, 0]
+        out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = [0, 0, 255]
+
+        left_line_window1 = np.array([np.transpose(np.vstack([left_fitx-margin, ploty]))])
+        left_line_window2 = np.array([np.flipud(np.transpose(np.vstack([left_fitx+margin,
+                                                                        ploty])))])
+        left_line_pts = np.hstack((left_line_window1, left_line_window2))
+        right_line_window1 = np.array([np.transpose(np.vstack([right_fitx-margin, ploty]))])
+        right_line_window2 = np.array([np.flipud(np.transpose(np.vstack([right_fitx+margin,
+                                                                         ploty])))])
+        right_line_pts = np.hstack((right_line_window1, right_line_window2))
+
+        # Draw the lane onto the warped blank image
+        cv2.fillPoly(window_img, np.int_([left_line_pts]), (0,255, 0))
+        cv2.fillPoly(window_img, np.int_([right_line_pts]), (0,255, 0))
+        result = cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
+
+        plt.plot(left_fitx, ploty, color='yellow')
+        plt.plot(right_fitx, ploty, color='yellow')
+
+        return result, left_fitx, right_fitx, ploty
+
+    def fit_poly(self, img_shape, leftx, lefty, rightx, righty):
+        left_fit = np.polyfit(lefty, leftx, 2)
+        right_fit = np.polyfit(righty, rightx, 2)
+
+        ploty = np.linspace(0, img_shape[0]-1, img_shape[0])
+        left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
+        right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
+
+        self.left_fit = left_fit
+        self.right_fit = right_fit
+
+        return left_fitx, right_fitx, ploty
