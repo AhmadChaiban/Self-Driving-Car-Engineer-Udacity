@@ -37,6 +37,10 @@ def img_pipeline(img):
 
     result = project_to_video(pers_transform, undistorted_img, left_fitx, right_fitx, ploty, M, src)
 
+    left_curverad, right_curverad = poly_fitter.measure_curvature_pixels()
+
+    cv2.putText(result, str(left_curverad) + " " + str(right_curverad), (50,100), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255),2)
+
     return result
     # return sliding_windows_img
     # return poly_fit_img
@@ -52,7 +56,7 @@ def img_pipeline(img):
     plt.imshow(combined_binary, cmap="gray")
     plt.show()
 
-    plt.imshow(pers_transform)
+    plt.imshow(pers_transform, cmap="gray")
     plt.show()
 
     plt.imshow(poly_fit_img)
@@ -61,6 +65,7 @@ def img_pipeline(img):
     plt.imshow(result)
     plt.show()
 
+    exit()
     # return result
 
 if __name__ == '__main__':
@@ -74,15 +79,15 @@ if __name__ == '__main__':
     clip = white_clip.fl_image(pipeline_yolo)
     clip.write_videofile(white_output, audio=False)
 
-    # white_output = 'output_images/challenge_video.mp4'
+    # white_output = 'output_images/challenge_video_2.mp4'
     # clip1 = VideoFileClip("videos/challenge_video.mp4")
     # white_clip = clip1.fl_image(img_pipeline)
     # clip = white_clip.fl_image(pipeline_yolo)
     # clip.write_videofile(white_output, audio=False)
     #
-    # white_output = 'output_images/harder_challenge_video.mp4'
-    # clip1 = VideoFileClip("videos/harder_challenge_video.mp4")
-    # white_clip = clip1.fl_image(img_pipeline)
-    # clip = white_clip.fl_image(pipeline_yolo)
-    # clip.write_videofile(white_output, audio=False)
+    white_output = 'output_images/harder_challenge_video.mp4'
+    clip1 = VideoFileClip("videos/harder_challenge_video.mp4")#.subclip(7, 8)
+    white_clip = clip1.fl_image(img_pipeline)
+    clip = white_clip.fl_image(pipeline_yolo)
+    clip.write_videofile(white_output, audio=False)
     #

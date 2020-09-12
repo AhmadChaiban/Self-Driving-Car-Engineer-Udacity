@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
 class GradientApplier:
 
@@ -60,14 +61,14 @@ class GradientApplier:
         ksize = 11 # Choose a larger odd number to smooth gradient measurements
         # Apply each of the thresholding functions
         gradx = self.abs_sobel_thresh(L_channel, orient='x', sobel_kernel=ksize, thresh=(20, 100))
-        # grady = self.abs_sobel_thresh(L_channel, orient='y', sobel_kernel=ksize, thresh=(90, 250))
-        # mag_binary = self.mag_thresh(L_channel, sobel_kernel=ksize, mag_thresh=(90, 255))
-        # dir_binary = self.dir_threshold(L_channel, sobel_kernel=ksize, thresh=(0.7, 1.3))
+        grady = self.abs_sobel_thresh(L_channel, orient='y', sobel_kernel=ksize, thresh=(90, 255))
+        mag_binary = self.mag_thresh(L_channel, sobel_kernel=ksize, mag_thresh=(25, 75))
+        dir_binary = self.dir_threshold(L_channel, sobel_kernel=ksize, thresh=(0, np.pi/2))
 
         # combined = np.zeros_like(dir_binary)
         # combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1))] = 1
 
         combined_binary = np.zeros_like(gradx)
-        combined_binary[(gradx == 1) | (binary_S_img == 1)] = 1
+        combined_binary[(gradx == 1) & (grady == 1) | (binary_S_img == 1) & (mag_binary == 1)] = 1
 
         return combined_binary

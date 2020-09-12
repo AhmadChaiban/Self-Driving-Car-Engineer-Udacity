@@ -1,11 +1,13 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
+from scipy.signal import butter, filtfilt
 
 class PolyFitter:
     def __init__(self):
         self.left_fit = None
         self.right_fit = None
+        self.ploty = None
 
     def lane_histogram(self, img):
         y = int(len(img)/2)
@@ -16,13 +18,28 @@ class PolyFitter:
         histogram = sum(bottom_half)
         return histogram
 
+    def butter_lowpass_filter(self, data, cutoff, fs, order):
+        nyq = 0.5 * fs
+        normal_cutoff = cutoff / nyq  # Nyquist Frequency
+        # Get the filter coefficients
+        b, a = butter(order, normal_cutoff, btype='low', analog=False)
+        y = filtfilt(b, a, data)
+        return y
+
+
     def apply_sliding_window(self, filtered_img, nwindows=9, margin=100, minpix=50):
         out_img = np.dstack((filtered_img, filtered_img, filtered_img))
         histogram = np.sum(filtered_img[filtered_img.shape[0]//2:, :], axis=0)
 
-        midpoint = np.int(histogram.shape[0]//2)
-        leftx_base = np.argmax(histogram[:midpoint])
-        rightx_base = np.argmax(histogram[midpoint:]) + midpoint
+        butter_low = self.butter_lowpass_filter(histogram, cutoff=3, fs=400, order=2)
+
+        # plt.plot(histogram)
+        # plt.plot(butter_low)
+        # plt.show()
+
+        midpoint = np.int(butter_low.shape[0]//2)
+        leftx_base = np.argmax(butter_low[:midpoint])
+        rightx_base = np.argmax(butter_low[midpoint:]) + midpoint
 
         window_height = np.int(filtered_img.shape[0]//nwindows)
 
@@ -36,6 +53,7 @@ class PolyFitter:
         left_lane_inds = []
         right_lane_inds = []
 
+        count = 0
         for window in range(nwindows):
             win_y_low = filtered_img.shape[0] - (window+1)*window_height
             win_y_high = filtered_img.shape[0] - window*window_height
@@ -64,6 +82,11 @@ class PolyFitter:
             if len(good_right_inds) > minpix:
                 rightx_current = np.int(np.mean(nonzerox[good_right_inds]))
 
+            # elif (len(good_left_inds) <= minpix) and (len(good_right_inds) <= minpix):
+            #     count += 1
+            # if count > 1:
+            #     break
+
         try:
             left_lane_inds = np.concatenate(left_lane_inds)
             right_lane_inds = np.concatenate(right_lane_inds)
@@ -78,13 +101,15 @@ class PolyFitter:
         return leftx, lefty, rightx, righty, out_img
 
     def fit_polynomial(self, leftx, lefty, rightx, righty, sliding_windows_img):
-        left_fit = np.polyfit(lefty, leftx, deg = 2)
-        right_fit = np.polyfit(righty, rightx, deg = 2)
+        left_fit = np.polyfit(lefty, leftx, deg=2)
+        right_fit = np.polyfit(righty, rightx, deg=2)
 
         self.left_fit = left_fit
         self.right_fit = right_fit
 
         ploty = np.linspace(0, sliding_windows_img.shape[0]-1, sliding_windows_img.shape[0])
+        self.ploty = ploty
+
         try:
             left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
             right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
@@ -93,8 +118,8 @@ class PolyFitter:
             left_fitx = 1*ploty**2 + 1*ploty
             right_fitx = 1*ploty**2 + 1*ploty
 
-        sliding_windows_img[lefty, leftx] = [255, 0, 0]
-        sliding_windows_img[righty, rightx] = [0, 0, 255]
+        # sliding_windows_img[lefty, leftx] = [255, 0, 0]
+        # sliding_windows_img[righty, rightx] = [0, 0, 255]
 
         # Plots the left and right polynomials on the lane lines
         plt.plot(left_fitx, ploty, color='yellow')
@@ -102,7 +127,16 @@ class PolyFitter:
 
         return sliding_windows_img, left_fitx, right_fitx, ploty
 
-    def search_around_poly(self, binary_warped, margin=30):
+    def measure_curvature_pixels(self):
+
+        y_eval = np.max(self.ploty)
+
+        left_curverad = ((1 + (2*self.left_fit[0]*y_eval + self.left_fit[1])**2)**1.5) / np.absolute(2*self.left_fit[0])
+        right_curverad = ((1 + (2*self.right_fit[0]*y_eval + self.right_fit[1])**2)**1.5) / np.absolute(2*self.right_fit[0])
+
+        return left_curverad, right_curverad
+
+    def search_around_poly(self, binary_warped, margin=100):
 
         nonzero = binary_warped.nonzero()
         nonzeroy = np.array(nonzero[0])
@@ -121,7 +155,7 @@ class PolyFitter:
         rightx = nonzerox[right_lane_inds]
         righty = nonzeroy[right_lane_inds]
 
-        left_fitx, right_fitx, ploty = self.fit_poly(binary_warped.shape, leftx, lefty, rightx, righty)
+        sliding_windows_img, left_fitx, right_fitx, ploty = self.fit_polynomial(leftx, lefty, rightx, righty, binary_warped)
 
         out_img = np.dstack((binary_warped, binary_warped, binary_warped))*255
         window_img = np.zeros_like(out_img)
@@ -147,16 +181,3 @@ class PolyFitter:
         plt.plot(right_fitx, ploty, color='yellow')
 
         return result, left_fitx, right_fitx, ploty
-
-    def fit_poly(self, img_shape, leftx, lefty, rightx, righty):
-        left_fit = np.polyfit(lefty, leftx, 2)
-        right_fit = np.polyfit(righty, rightx, 2)
-
-        ploty = np.linspace(0, img_shape[0]-1, img_shape[0])
-        left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
-        right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
-
-        self.left_fit = left_fit
-        self.right_fit = right_fit
-
-        return left_fitx, right_fitx, ploty
