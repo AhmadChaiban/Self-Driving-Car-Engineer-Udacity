@@ -42,15 +42,25 @@ class CameraCalibrator:
 
         img_size = (undist_img.shape[1], undist_img.shape[0])
 
-        src = np.float32([[0.15*img_width, img_height*0.95],
-                          [0.45*img_width, 455],
-                          [0.55*img_width, 455],
-                          [0.85*img_width, img_height*0.95]])
+        # src = np.float32([[0.15*img_width, img_height*0.95],
+        #                   [0.45*img_width, 455],
+        #                   [0.55*img_width, 455],
+        #                   [0.85*img_width, img_height*0.95]])
+        #
+        # dst = np.float32([[0.15*img_width, img_height*0.95],
+        #                   [0.45*img_width - offset, 455 - offset],
+        #                   [0.55*img_width + offset, 455 - offset],
+        #                   [0.85*img_width, img_height*0.95]])
 
-        dst = np.float32([[0.15*img_width, img_height*0.95],
-                          [0.45*img_width - offset, 455 - offset],
-                          [0.55*img_width + offset, 455 - offset],
-                          [0.85*img_width, img_height*0.95]])
+        src = np.float32([[0, img_height],
+                          [0.4*img_width, 455],
+                          [0.6*img_width, 455],
+                          [img_width, img_height]])
+
+        dst = np.float32([[0, img_height],
+                          [0, 0],
+                          [img_width, 0],
+                          [img_width, img_height]])
 
         M = cv2.getPerspectiveTransform(src, dst)
         warped = cv2.warpPerspective(undist_img, M, img_size)
