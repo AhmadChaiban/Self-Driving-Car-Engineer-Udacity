@@ -49,7 +49,8 @@ def img_pipeline(img):
 
     left_curverad, right_curverad = poly_fitter.measure_curvature_pixels()
 
-    cv2.putText(result, str(left_curverad) + " " + str(right_curverad), (50,100), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255),2)
+    cv2.putText(result, str(round(left_curverad, 0)), (50,100), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255),2)
+    cv2.putText(result, str(round(right_curverad, 0)), (1100,100), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255),2)
 
     return result
     # return sliding_windows_img
