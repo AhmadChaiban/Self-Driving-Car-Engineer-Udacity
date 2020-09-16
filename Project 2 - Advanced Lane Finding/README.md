@@ -96,25 +96,25 @@ After the above combination, the sliding windows method was applied to pinpoint 
 1. A histogram of the bottom half of the warped image is found and a low pass butterworth filter is applied. The 
 following is the result: 
 
-<center>
+<p align="center">
     <img src="doc_imgs/hist.png"/>
-</center>
+</p>
 
 2. The maximum peak before and after the midpoint are selected and assumed to be where the lanes begin. 
 3. A window of margin 100 is run through the bases of those peaks and moves upwards, discovering lanes based on a 
 threshold of pixels. The following becomes the result: 
 
-<center>
+<p align="center">
     <img src="doc_imgs/polyfit.png" height="358" width="650"/>
-</center>
+</p>
 
 4. After that, in order to save time and stop the pipeline from blindly searching for the lanes on every frame, a look
 ahead is implemented. This basically will take the values of the previous fit and continue forward. The following is 
 a visual of the result:
 
-<center>
+<p align="center">
     <img src="pipeline_imgs/11_sliding_windows_img.jpg" height="320" width="680"/>
-</center>
+</p>
 
 #### Radius of Curvature:
 
@@ -128,30 +128,30 @@ frame's width. A conversion to meters is then made.
 Additionally, I decided to implement some vehicle detection using a Yolo_pipeline from https://junshengfu.github.io/vehicle-detection/.
 It was very much a plug and play and works well to a certain extent. 
 
-<center>
+<p align="center">
     <img src="doc_imgs/YOLO.png"/>
-</center>
+</p>
 
 #### Final Result and videos:
 
     Main video:
 
 
-<center>
+<p align="center">
     <img src="output_images/project_video.gif"/>
-</center>
+</p>
 
     Challenge video:
 
-<center>
+<p align="center">
     <img src="output_images/challenge_video.gif"/>
-</center>
+</p>
 
     Harder Challenge video:
 
-<center>
+<p align="center">
     <img src="output_images/harder_challenge_video.gif"/>
-</center>
+</p>
 
 
 #### Some Drawbacks: 
