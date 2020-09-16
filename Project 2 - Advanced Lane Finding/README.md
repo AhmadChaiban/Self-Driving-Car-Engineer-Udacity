@@ -106,7 +106,6 @@ threshold of pixels. The following becomes the result:
 
 <center>
     <img src="doc_imgs/polyfit.png" height="358" width="650"/>
-    <p></p>
 </center>
 
 4. After that, in order to save time and stop the pipeline from blindly searching for the lanes on every frame, a look
@@ -115,7 +114,6 @@ a visual of the result:
 
 <center>
     <img src="pipeline_imgs/11_sliding_windows_img.jpg" height="320" width="680"/>
-    <p></p>
 </center>
 
 #### Radius of Curvature:
@@ -132,7 +130,6 @@ It was very much a plug and play and works well to a certain extent.
 
 <center>
     <img src="doc_imgs/YOLO.png"/>
-    <p></p>
 </center>
 
 #### Final Result and videos:
@@ -142,21 +139,18 @@ It was very much a plug and play and works well to a certain extent.
 
 <center>
     <img src="output_images/project_video.gif"/>
-    <p></p>
 </center>
 
     Challenge video:
 
 <center>
     <img src="output_images/challenge_video.gif"/>
-    <p></p>
 </center>
 
     Harder Challenge video:
 
 <center>
     <img src="output_images/harder_challenge_video.gif"/>
-    <p></p>
 </center>
 
 
