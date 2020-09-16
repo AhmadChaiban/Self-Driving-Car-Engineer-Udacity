@@ -65,7 +65,7 @@ class CameraCalibrator:
         M = cv2.getPerspectiveTransform(src, dst)
         warped = cv2.warpPerspective(undist_img, M, img_size)
 
-        return warped, M, src
+        return warped, M, src, dst
 
     def calibrate_camera(self):
         calibration_img_fnames = globlin('./camera_cal/*.*')
@@ -75,7 +75,7 @@ class CameraCalibrator:
             img = cv2.imread(path)
             imgpoints, objpoints = self.calc_obj_img_points(img, objpoints, imgpoints)
 
-        img = cv2.imread(calibration_img_fnames[6])
+        img = cv2.imread('./camera_cal/calibration1.jpg')
         undistorted_img, mtx, dist = self.camera_calibration(img, objpoints, imgpoints)
 
         pickle_out = open("wide_dist_pickle.p", "wb")
@@ -87,5 +87,4 @@ class CameraCalibrator:
 if __name__ == '__main__':
     undistorted_img = CameraCalibrator(9, 6).calibrate_camera()
 
-    plt.imshow(undistorted_img)
-    plt.show()
+    cv2.imwrite('./camera_cal/calibration1_undistorted.jpg', undistorted_img)

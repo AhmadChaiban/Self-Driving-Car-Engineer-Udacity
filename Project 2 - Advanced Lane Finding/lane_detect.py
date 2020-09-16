@@ -19,9 +19,9 @@ def pipeline_yolo(img):
     return output
 
 def img_pipeline(img):
-
     ## Sobel and HSV
     undistorted_img = camera.undistort_image(img)
+    # pers_transform2, M, src, dst = camera.corners_unwarp(undistorted_img)
 
     binary_img, L_channel, S_channel = gradient_applier.get_s_L_channel(undistorted_img)
 
@@ -31,9 +31,9 @@ def img_pipeline(img):
 
     combined_binary = cv2.bitwise_or(combined_binary_S, combined_binary_L)
 
-    pers_transform, M, src = camera.corners_unwarp(combined_binary)
+    pers_transform, M, src, dst = camera.corners_unwarp(combined_binary)
 
-    stacked_pers_transform = np.dstack((pers_transform, pers_transform, pers_transform))
+    stacked_pers_transform = np.dstack((pers_transform * 255, pers_transform * 255, pers_transform * 255))
 
     color_masked_image_warped = gradient_applier.combine_color_mask(undistorted_img, camera)
 
@@ -44,14 +44,29 @@ def img_pipeline(img):
     except:
         leftx, lefty, rightx, righty, sliding_windows_img = poly_fitter.apply_sliding_window(final_transform)
         poly_fit_img,  left_fitx, right_fitx, ploty = poly_fitter.fit_polynomial(leftx, lefty, rightx, righty, sliding_windows_img)
+        # cv2.imwrite('./pipeline_imgs/11.5_sliding_windows.jpg', sliding_windows_img)
 
     result = project_to_video(pers_transform, undistorted_img, left_fitx, right_fitx, ploty, M, src)
 
-    left_curverad, right_curverad = poly_fitter.measure_curvature_pixels()
+    # save_img_pipelines(img,
+    #                    undistorted_img,
+    #                    L_channel,
+    #                    S_channel,
+    #                    combined_binary_S,
+    #                    combined_binary_L,
+    #                    combined_binary,
+    #                    pers_transform,
+    #                    color_masked_image_warped,
+    #                    final_transform,
+    #                    sliding_windows_img,
+    #                    result)
 
-    cv2.putText(result, str(round(left_curverad, 0)), (50,100), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255),2)
-    cv2.putText(result, str(round(right_curverad, 0)), (1100,100), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,255,255),2)
+    left_curverad, right_curverad, veh_pos = poly_fitter.measure_curvature_pixels(img)
 
+    cv2.putText(result, str(round(left_curverad, 0)), (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+    cv2.putText(result, str(round(right_curverad, 0)), (1100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+    cv2.putText(result, str(round(veh_pos, 2)) + "m", (595, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+    #
     return result
     # return sliding_windows_img
     # return poly_fit_img
@@ -67,6 +82,7 @@ def img_pipeline(img):
     plt.show()
 
     plt.imshow(pers_transform, cmap="gray")
+    plt.scatter(dst[:, 0], dst[:, 1], color = 'red')
     plt.show()
 
     plt.imshow(final_transform)
@@ -88,7 +104,7 @@ if __name__ == '__main__':
     # img_pipeline(img)
 
     white_output = 'output_images/project_video.mp4'
-    clip1 = VideoFileClip("videos/project_video.mp4")#.subclip(18, 24)
+    clip1 = VideoFileClip("videos/project_video.mp4")# .subclip(0, 2)
     white_clip = clip1.fl_image(img_pipeline)
     clip = white_clip.fl_image(pipeline_yolo)
     clip.write_videofile(white_output, audio=False)

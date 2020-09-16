@@ -1,39 +1,187 @@
-## Advanced Lane Finding
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
-![Lanes Image](./examples/example_output.jpg)
+## Project: Advanced Lane Finding
 
-In this project, your goal is to write a software pipeline to identify the lane boundaries in a video, but the main output or product we want you to create is a detailed writeup of the project.  Check out the [writeup template](https://github.com/udacity/CarND-Advanced-Lane-Lines/blob/master/writeup_template.md) for this project and use it as a starting point for creating your own writeup.  
+In this project, I was tasked with using more practical OpenCV techniques for lane line detection. An entire pipeline was built 
+to process each frame individually. I also used YOLO vehicle detection (pretrained model) in order to make a basic detection of the
+vehicles surrounding the Self-driving car. 
 
-Creating a great writeup:
----
-A great writeup should include the rubric points as well as your description of how you addressed each point.  You should include a detailed description of the code used in each step (with line-number references and code snippets where necessary), and links to other supporting documents or external references.  You should include images in your writeup to demonstrate how your code works with examples.  
+### Lane Detection Pipeline Overview:
 
-All that said, please be concise!  We're not looking for you to write a book here, just a brief description of how you passed each rubric point, and references to the relevant code :). 
+The following is a visual representation of the lane detection pipeline:
 
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup.
+<center>
+    <img src="doc_imgs/img_pipeline.png"/>
+</center>
 
-The Project
----
+### Detailed Procedure:
 
-The goals / steps of this project are the following:
+#### Camera Calibration:
 
-* Compute the camera calibration matrix and distortion coefficients given a set of chessboard images.
-* Apply a distortion correction to raw images.
-* Use color transforms, gradients, etc., to create a thresholded binary image.
-* Apply a perspective transform to rectify binary image ("birds-eye view").
-* Detect lane pixels and fit to find the lane boundary.
-* Determine the curvature of the lane and vehicle position with respect to center.
-* Warp the detected lane boundaries back onto the original image.
-* Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
+Through specific OpenCV functions, a set of chessboard images were used to discover corners and calibrate the camera for all images. 
 
-The images for camera calibration are stored in the folder called `camera_cal`.  The images in `test_images` are for testing your pipeline on single frames.  If you want to extract more test images from the videos, you can simply use an image writing method like `cv2.imwrite()`, i.e., you can read the video in frame by frame as usual, and for frames you want to save for later you can write to an image file.  
+The following is the result of undistorting one of the chessboard images: 
 
-To help the reviewer examine your work, please save examples of the output from each stage of your pipeline in the folder called `output_images`, and include a description in your writeup for the project of what each image shows.    The video called `project_video.mp4` is the video your pipeline should work well on.  
+distorted image | undistorted image
+:--------------:|:------------------:
+![](camera_cal/calibration1.jpg)| ![](camera_cal/calibration1_undistorted.jpg)
 
-The `challenge_video.mp4` video is an extra (and optional) challenge for you if you want to test your pipeline under somewhat trickier conditions.  The `harder_challenge.mp4` video is another optional challenge and is brutal!
+#### HSL Conversion and Gradient Combination:
 
-If you're feeling ambitious (again, totally optional though), don't stop there!  We encourage you to go out and take video of your own, calibrate your camera and show us how you would implement this project from scratch!
+1. The undistorted frame is converted to the HSL color space. 
+2. The S and L channels are separated. 
+3. A combined gradient is applied to each of these channels. 
+4. Both channels are then combined. 
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+Note that the following parameters were using for the gradient threshold
+```
+Sobelx   -- Kernel size = 3, threshold = (50,  200)
+Sobely   -- Kernel size = 3, threshold = (50,  200)
+SobelMag -- Kernel size = 5, threshold = (20,  150)
+SobelDir -- Kernel size = 5, threshold = (0.6, 1.1)
+```
 
+They are then combined in the following manner:
+
+```
+Sobelx == 1 and Sobely == 1 or SobelMag == 1 and SobelDir == 1
+```
+
+This combination gives the results that can be seen in the pipeline overview figure above. 
+
+#### Perspective transform
+
+At this stage, a bird's eye view is necessary in order to fit a 2D polynomial. The following vertices were selected in 
+order to properly warp the image:
+    
+    ## Before
+    src = np.float32([[0, img_height],
+                      [0.4*img_width, 455],
+                      [0.6*img_width, 455],
+                      [img_width, img_height]])
+                      
+    ## After
+    dst = np.float32([[0, img_height],
+                      [0, 0],
+                      [img_width, 0],
+                      [img_width, img_height]])
+                      
+Here is a visual representation of these points and the transformation:
+
+Original Image | Bird's eye view
+:--------------:|:------------------:
+![](doc_imgs/pers1.png)| ![](doc_imgs/pers2.png)
+
+#### Color Masking:
+
+While color masking is not a practical method to isolate lanes in noisey frames, it works well when combined with the 
+Sobel gradient method. The color masking may improve and solidify the Sobel gradient combination. 
+
+Basically, the yellow and white lanes were isolated and a mask was applied. The original undistorted image is first 
+converted to HSV, then a perspective transform is applied to the image to get a bird's eye view, then the following 
+values are used as thresholds for both lanes:
+
+    white_hsv_low  = np.array([20,   0,  200])
+    white_hsv_high = np.array([255,  80, 255])
+
+    yellow_hsv_low  = np.array([0,  80,  200])
+    yellow_hsv_high = np.array([40, 255, 255])
+    
+The color masking and combined Sobel warped images are combined with the bitwise_or function:
+
+    final_transform = cv2.bitwise_or(stacked_pers_transform, color_masked_image_warped)[:, :, 0]
+    
+#### Sliding Windows and Looking Ahead:
+
+After the above combination, the sliding windows method was applied to pinpoint the lanes. 
+
+1. A histogram of the bottom half of the warped image is found and a low pass butterworth filter is applied. The 
+following is the result: 
+
+<center>
+    <img src="doc_imgs/hist.png"/>
+</center>
+
+2. The maximum peak before and after the midpoint are selected and assumed to be where the lanes begin. 
+3. A window of margin 100 is run through the bases of those peaks and moves upwards, discovering lanes based on a 
+threshold of pixels. The following becomes the result: 
+
+<center>
+    <img src="doc_imgs/polyfit.png" height="358" width="650"/>
+    <p></p>
+</center>
+
+4. After that, in order to save time and stop the pipeline from blindly searching for the lanes on every frame, a look
+ahead is implemented. This basically will take the values of the previous fit and continue forward. The following is 
+a visual of the result:
+
+<center>
+    <img src="pipeline_imgs/11_sliding_windows_img.jpg" height="320" width="680"/>
+    <p></p>
+</center>
+
+#### Radius of Curvature:
+
+In order to find the vehicle's position, for each 2D polynomial, the first and second derivatives are calculated, and 
+the Radius of Curvature for both lanes is found. Then, in order to calculate the vehicle's position, the center of the 
+lanes is found by averaging both the left and right fitted polynomials, and then subtracting that center from half the 
+frame's width. A conversion to meters is then made. 
+
+#### Yolo Vehicle Detection: 
+
+Additionally, I decided to implement some vehicle detection using a Yolo_pipeline from https://junshengfu.github.io/vehicle-detection/.
+It was very much a plug and play and works well to a certain extent. 
+
+<center>
+    <img src="doc_imgs/YOLO.png"/>
+    <p></p>
+</center>
+
+#### Final Result and videos:
+
+    Main video:
+
+
+<center>
+    <img src="output_images/project_video.gif"/>
+    <p></p>
+</center>
+
+    Challenge video:
+
+<center>
+    <img src="output_images/challenge_video.gif"/>
+    <p></p>
+</center>
+
+    Harder Challenge video:
+
+<center>
+    <img src="output_images/harder_challenge_video.gif"/>
+    <p></p>
+</center>
+
+
+#### Some Drawbacks: 
+
+1. As the parameters regarding all the aspects of this setup are changed, and since this approach is done by example 
+rather than generally, it is very difficult to create a highly accurate pipeline for all scenarios. A deep learning 
+approach is required to do so. 
+
+2. Even with the look ahead method, the model takes too long to learn compared to the live video feed. This is not 
+practical when working on a live car. 
+
+3. When the algorithm meets some sudden curves or more complicated transitions and lane changes, it does not transition 
+well and sometimes even breaks (like in the harder_challenge_video).
+
+#### File structure: 
+
+- **lane_detect.py** contains the main lane detection pipeline. It also loads and processes the videos for lane and 
+vehicle detection.
+- **calibrate_camera.py** contains the class with the necessary functions to calibrate the camera and perform the 
+perspective transform.
+- **gradients.py** contains a class with all the functions related to color spaces and gradients.
+- **helpers.py** Some miscellaneous functions necessary for projecting the results to video and saving the pipeline 
+images. 
+- **polynomial_fit.py** houses the necessary functions for the sliding window, look ahead technique and radius of 
+curvature.
+- **VehicleClassifier** contains all the files relating to the vehicle detection. 
+- **output_images** contains the video results. 

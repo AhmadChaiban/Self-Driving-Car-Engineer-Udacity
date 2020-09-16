@@ -122,19 +122,31 @@ class PolyFitter:
         # sliding_windows_img[righty, rightx] = [0, 0, 255]
 
         # Plots the left and right polynomials on the lane lines
-        plt.plot(left_fitx, ploty, color='yellow')
-        plt.plot(right_fitx, ploty, color='yellow')
+        # plt.plot(left_fitx, ploty, color='yellow')
+        # plt.plot(right_fitx, ploty, color='yellow')
 
         return sliding_windows_img, left_fitx, right_fitx, ploty
 
-    def measure_curvature_pixels(self):
+    def measure_curvature_pixels(self, img):
 
         y_eval = np.max(self.ploty)
 
         left_curverad = ((1 + (2*self.left_fit[0]*y_eval + self.left_fit[1])**2)**1.5) / np.absolute(2*self.left_fit[0])
         right_curverad = ((1 + (2*self.right_fit[0]*y_eval + self.right_fit[1])**2)**1.5) / np.absolute(2*self.right_fit[0])
 
-        return left_curverad, right_curverad
+        xm_per_pix = 3.7/700 # meters per pixel in x dimension
+
+        left_x_pos = self.left_fit[0]*y_eval**2 + self.left_fit[1]*y_eval + self.left_fit[2]
+        right_x_pos = self.right_fit[0]*y_eval**2 + self.right_fit[1]*y_eval + self.right_fit[2]
+        center_lanes_x = (left_x_pos + right_x_pos)//2
+
+        # Calculate the deviation between the center of the lane and the center of the picture
+        # The car is assumed to be placed in the center of the picture
+        # If the deviation is negative, the car is on the felt hand side of the center of the lane
+
+        veh_pos = ((img.shape[1]//2) - center_lanes_x) * xm_per_pix
+
+        return left_curverad, right_curverad, veh_pos
 
     def search_around_poly(self, binary_warped, margin=100):
 
@@ -177,7 +189,7 @@ class PolyFitter:
         cv2.fillPoly(window_img, np.int_([right_line_pts]), (0,255, 0))
         result = cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
 
-        plt.plot(left_fitx, ploty, color='yellow')
-        plt.plot(right_fitx, ploty, color='yellow')
+        # plt.plot(left_fitx, ploty, color='yellow')
+        # plt.plot(right_fitx, ploty, color='yellow')
 
         return result, left_fitx, right_fitx, ploty

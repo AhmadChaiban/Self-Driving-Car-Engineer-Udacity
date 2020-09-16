@@ -25,3 +25,29 @@ def project_to_video(pers_transform, undistorted_img, left_fitx, right_fitx, plo
 
     return result
 
+def save_img_pipelines(img,
+                       undistorted_img,
+                       L_channel,
+                       S_channel,
+                       combined_binary_S,
+                       combined_binary_L,
+                       combined_binary,
+                       pers_transform,
+                       color_masked_image_warped,
+                       final_transform,
+                       sliding_windows_img,
+                       result):
+
+    cv2.imwrite('./pipeline_imgs/1_initial_img.jpg',               img)
+    cv2.imwrite('./pipeline_imgs/2_undistorted_img.jpg',           undistorted_img)
+    cv2.imwrite('./pipeline_imgs/3_L_channel.jpg',                 L_channel)
+    cv2.imwrite('./pipeline_imgs/4_S_channel.jpg',                 S_channel)
+    cv2.imwrite('./pipeline_imgs/5_combined_binary_S.jpg',         combined_binary_S * 255)
+    cv2.imwrite('./pipeline_imgs/6_combined_binary_L.jpg',         combined_binary_L * 255)
+    cv2.imwrite('./pipeline_imgs/7_combined_binary.jpg',           combined_binary * 255)
+    cv2.imwrite('./pipeline_imgs/8_pers_transform.jpg',            pers_transform * 255)
+    cv2.imwrite('./pipeline_imgs/9_color_masked_image_warped.jpg', color_masked_image_warped)
+    cv2.imwrite('./pipeline_imgs/10_final_transform.jpg',           final_transform)
+    cv2.imwrite('./pipeline_imgs/11_sliding_windows_img.jpg',       sliding_windows_img)
+    cv2.imwrite('./pipeline_imgs/12_result.jpg',                    result)
+

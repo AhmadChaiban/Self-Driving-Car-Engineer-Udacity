@@ -48,7 +48,7 @@ class GradientApplier:
 
         image_HSV = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
 
-        pers_transform_mask, M, src = camera.corners_unwarp(image_HSV)
+        pers_transform_mask, M, src, dst = camera.corners_unwarp(image_HSV)
 
         white_hsv_low  = np.array([20,   0,  200])
         white_hsv_high = np.array([255,  80, 255])
@@ -102,6 +102,6 @@ class GradientApplier:
         # combined[((gradx == 1) & (grady == 1)) | ((mag_binary == 1) & (dir_binary == 1))] = 1
 
         combined_binary = np.zeros_like(gradx)
-        combined_binary[(gradx == 1) | (grady == 1) | (mag_binary == 1) | (dir_binary == 1)] = 1
+        combined_binary[(gradx == 1) & (grady == 1) | (mag_binary == 1) & (dir_binary == 1)] = 1
 
         return combined_binary
