@@ -1,58 +1,131 @@
-## Project: Build a Traffic Sign Recognition Program
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
+# Project 3: Traffic Sign Classifier
 
-Overview
----
-In this project, you will use what you've learned about deep neural networks and convolutional neural networks to classify traffic signs. You will train and validate a model so it can classify traffic sign images using the [German Traffic Sign Dataset](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset). After the model is trained, you will then try out your model on images of German traffic signs that you find on the web.
+In this project,  neural networks were used to classify traffic signs from [German Traffic Sign Benchmarks](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset). 
 
-We have included an Ipython notebook that contains further instructions 
-and starter code. Be sure to download the [Ipython notebook](https://github.com/udacity/CarND-Traffic-Sign-Classifier-Project/blob/master/Traffic_Sign_Classifier.ipynb). 
+## Data Sample and Distributions:
 
-We also want you to create a detailed writeup of the project. Check out the [writeup template](https://github.com/udacity/CarND-Traffic-Sign-Classifier-Project/blob/master/writeup_template.md) for this project and use it as a starting point for creating your own writeup. The writeup can be either a markdown file or a pdf document.
+The following is a preview of the data set. There are more than 50,000 lifelike images of  German traffic signs. 
 
-To meet specifications, the project will require submitting three files: 
-* the Ipython notebook with the code
-* the code exported as an html file
-* a writeup report either as a markdown or pdf file 
+![output_9_1.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/output_9_1.png)
 
-Creating a Great Writeup
----
-A great writeup should include the [rubric points](https://review.udacity.com/#!/rubrics/481/view) as well as your description of how you addressed each point.  You should include a detailed description of the code used in each step (with line-number references and code snippets where necessary), and links to other supporting documents or external references.  You should include images in your writeup to demonstrate how your code works with examples.  
+The dataset is distributed evenly across both color and category. The following results could be seen. 
 
-All that said, please be concise!  We're not looking for you to write a book here, just a brief description of how you passed each rubric point, and references to the relevant code :). 
+Distribution across Channel:
 
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup.
+![stepfilled.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/stepfilled.png)
 
-The Project
----
-The goals / steps of this project are the following:
-* Load the data set
-* Explore, summarize and visualize the data set
-* Design, train and test a model architecture
-* Use the model to make predictions on new images
-* Analyze the softmax probabilities of the new images
-* Summarize the results with a written report
+Distribution across Class:
 
-### Dependencies
-This lab requires:
+![download.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/download.png)
 
-* [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit)
+### Model Architecture: LeNet 5
 
-The lab environment can be created with CarND Term1 Starter Kit. Click [here](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) for the details.
+![lenet.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/lenet.png)
 
-### Dataset and Repository
+Using the LeNet 5 model yielded some decent results. It was adjusted for the use cases in the below code. 
 
-1. Download the data set. The classroom has a link to the data set in the "Project Instructions" content. This is a pickled dataset in which we've already resized the images to 32x32. It contains a training, validation and test set.
-2. Clone the project, which contains the Ipython notebook and the writeup template.
-```sh
-git clone https://github.com/udacity/CarND-Traffic-Sign-Classifier-Project
-cd CarND-Traffic-Sign-Classifier-Project
-jupyter notebook Traffic_Sign_Classifier.ipynb
+```python
+LeNet = tf.keras.Sequential([
+    tf.keras.layers.Conv2D(filters=6, 
+                           kernel_size=(5, 5), 
+                           activation='relu', 
+                           strides=(1, 1),
+                           padding='valid',
+                           input_shape=(32,32, 1)),
+    tf.keras.layers.MaxPooling2D((2, 2)),
+    tf.keras.layers.Conv2D(filters=16, 
+                           kernel_size=(5, 5), 
+                           activation='relu'),
+    tf.keras.layers.MaxPooling2D((2, 2)),
+    
+    tf.keras.layers.Flatten(),
+    tf.keras.layers.Dense(120, activation='relu'),
+    tf.keras.layers.Dense(84, activation='relu'),
+    tf.keras.layers.Dense(n_classes, activation='softmax')
+])
 ```
 
-### Requirements for Submission
-Follow the instructions in the `Traffic_Sign_Classifier.ipynb` notebook and write the project report using the writeup template as a guide, `writeup_template.md`. Submit the project code and writeup document.
+### Training Results
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+The model was compiled and fitted in the following manner on the data. It was a relatively straigtforward model, and the results were quite decent. Even on the first try.  The validation accuracy was over 93%. 
+
+```python
+epochs = 10
+batch_size = 32
+optimizer = tf.keras.optimizers.Adam(learning_rate= 0.01, name='Adam')
+loss_function = tf.keras.losses.sparse_categorical_crossentropy
+
+LeNet.compile(optimizer='adam', loss= loss_function, metrics=['accuracy'])
+history = LeNet.fit(
+    x=X_train_norm, 
+    y=y_train, 
+    batch_size = batch_size, 
+    epochs=epochs, 
+    validation_data= (X_valid_norm, y_valid)
+)
+```
+
+```latex
+Epoch 1/10
+1088/1088 [==============================] - 5s 5ms/step - loss: 0.0239 
+- accuracy: 0.9930 - val_loss: 0.4545 - val_accuracy: 0.9295
+Epoch 2/10
+1088/1088 [==============================] - 5s 5ms/step - loss: 0.0265 
+- accuracy: 0.9930 - val_loss: 0.3280 - val_accuracy: 0.9379
+Epoch 3/10
+1088/1088 [==============================] - 5s 5ms/step - loss: 0.0256 
+- accuracy: 0.9928 - val_loss: 0.3236 - val_accuracy: 0.9385
+Epoch 4/10
+1088/1088 [==============================] - 5s 5ms/step - loss: 0.0183
+- accuracy: 0.9948 - val_loss: 0.3992 - val_accuracy: 0.9283
+Epoch 5/10
+1088/1088 [==============================] - 5s 5ms/step - loss: 0.0172 
+- accuracy: 0.9955 - val_loss: 0.5683 - val_accuracy: 0.9143
+Epoch 6/10
+1088/1088 [==============================] - 5s 5ms/step - loss: 0.0225 
+- accuracy: 0.9936 - val_loss: 0.4050 - val_accuracy: 0.9379
+Epoch 7/10
+1088/1088 [==============================] - 5s 5ms/step - loss: 0.0164 
+- accuracy: 0.9954 - val_loss: 0.4559 - val_accuracy: 0.9392
+Epoch 8/10
+1088/1088 [==============================] - 5s 5ms/step - loss: 0.0204 
+- accuracy: 0.9943 - val_loss: 0.4192 - val_accuracy: 0.9363
+Epoch 9/10
+1088/1088 [==============================] - 5s 5ms/step - loss: 0.0138 
+- accuracy: 0.9962 - val_loss: 0.4540 - val_accuracy: 0.9315
+Epoch 10/10
+1088/1088 [==============================] - 5s 5ms/step - loss: 0.0155 
+- accuracy: 0.9956 - val_loss: 0.4618 - val_accuracy: 0.9236
+```
+
+The accuracy reported on the test set was 0.9138558986539984
+
+### Extra Images:
+
+The following were 8 extremely low quality examples to show that the model requires training on much more complicated data. Here is a plot of them after preprocessing and a slight enhancement. 
+
+![extra_example_images.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/extra_example_images.png)
+
+The accuracy reported here was somewhere around 0.125, which is obviously not great. It seems as if these images either require more preprocessing, or the training requires more varied data. 
+
+### Feature Maps
+
+Here is a visualization of how the model was extracting features from predicting the following image. 
+
+![output_31_1.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/output_31_1.png)
+
+![visualization_feature.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/visualization_feature.png)
+
+![feature2.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/feature2.png)
+
+![feature3.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/feature3.png)
+
+![feature4.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/feature4.png)
+
+
+
+
+
+
+
 
