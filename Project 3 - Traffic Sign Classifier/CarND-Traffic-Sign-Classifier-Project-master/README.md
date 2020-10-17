@@ -6,21 +6,21 @@ In this project,  neural networks were used to classify traffic signs from [Germ
 
 The following is a preview of the data set. There are more than 50,000 lifelike images of  German traffic signs. 
 
-![output_9_1.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/output_9_1.png)
+![output_9_1.png](./doc_images/output_9_1.png)
 
 The dataset is distributed evenly across both color and category. The following results could be seen. 
 
 Distribution across Channel:
 
-![stepfilled.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/stepfilled.png)
+![stepfilled.png](./doc_images/stepfilled.png)
 
 Distribution across Class:
 
-![download.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/download.png)
+![download.png](./doc_images/download.png)
 
 ### Model Architecture: LeNet 5
 
-![lenet.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/lenet.png)
+![lenet.png](./doc_images/lenet.png)
 
 Using the LeNet 5 model yielded some decent results. It was adjusted for the use cases in the below code. 
 
@@ -104,7 +104,7 @@ The accuracy reported on the test set was 0.9138558986539984
 
 The following were 8 extremely low quality examples to show that the model requires training on much more complicated data. Here is a plot of them after preprocessing and a slight enhancement. 
 
-![extra_example_images.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/extra_example_images.png)
+![extra_example_images.png](./doc_images/extra_example_images.png)
 
 The accuracy reported here was somewhere around 0.125, which is obviously not great. It seems as if these images either require more preprocessing, or the training requires more varied data. 
 
@@ -112,15 +112,15 @@ The accuracy reported here was somewhere around 0.125, which is obviously not gr
 
 Here is a visualization of how the model was extracting features from predicting the following image. 
 
-![output_31_1.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/output_31_1.png)
+![output_31_1.png](./doc_images/output_31_1.png)
 
-![visualization_feature.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/visualization_feature.png)
+![visualization_feature.png](./doc_images/visualization_feature.png)
 
-![feature2.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/feature2.png)
+![feature2.png](./doc_images/feature2.png)
 
-![feature3.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/feature3.png)
+![feature3.png](./doc_images/feature3.png)
 
-![feature4.png](/Users/ahmadchaiban/Desktop/Personal/Personal%20Projects/Self-Driving-Car-Engineer-Udacity/Project%203%20-%20Traffic%20Sign%20Classifier/CarND-Traffic-Sign-Classifier-Project-master/doc_images/feature4.png)
+![feature4.png](./doc_images/feature4.png)
 
 
 
