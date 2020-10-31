@@ -2,12 +2,12 @@
 This project will be completed and submitted via workspaces. The required files and resources, described below, are 
 already present in Behavioral Cloning Project workspace.
 
-- The GitHub repository has the following files:
+- The <a href = "https://github.com/udacity/CarND-Behavioral-Cloning-P3"  target="_blank" >GitHub repository</a> has the following files:
 
     - drive.py: a Python script that you can use to drive the car autonomously, once your deep neural network model is trained
     - writeup_template.md: a writeup templates
     - video.py: a script that can be used to make a video of the vehicle when it is driving autonomously
-- sample driving data (optional) - if you choose to use a workspace, this is already included in your files. You can 
+- <a href = "https://d17h27t6h515a5.cloudfront.net/topher/2016/December/584f6edd_data/data.zip" target="_blank">Sample driving data</a> (optional) - if you choose to use a workspace, this is already included in your files. You can 
 find it in /opt/carnd_p3/data/ (/opt is in the directory above /home, where your workspace is contained) when using GPU
 mode only. Note that if you choose to only use your own training data, you'll want to save it to a different directory 
 to make sure they are not accidentally combined.
