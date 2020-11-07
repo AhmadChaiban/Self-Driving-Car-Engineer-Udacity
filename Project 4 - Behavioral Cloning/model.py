@@ -3,16 +3,24 @@ from sklearn.metrics import r2_score
 
 class Model:
     def __init__(self):
-        self.n_classes = 4
+        self.n_classes = 1
         self.LeNet = tf.keras.Sequential([
             tf.keras.layers.Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160, 320, 3)),
-            tf.keras.layers.Cropping2D(cropping=((50, 20), (0,0))),
+
+            tf.keras.layers.Cropping2D(cropping=((50, 20), (0, 0))),
+
             tf.keras.layers.Conv2D(filters=6,
                                    kernel_size=(5, 5),
                                    activation='relu',
                                    strides=(1, 1),
                                    padding='valid'),
             tf.keras.layers.MaxPooling2D((2, 2)),
+
+            tf.keras.layers.Conv2D(filters=16,
+                                   kernel_size=(5, 5),
+                                   activation='relu'),
+            tf.keras.layers.MaxPooling2D((2, 2)),
+
             tf.keras.layers.Conv2D(filters=16,
                                    kernel_size=(5, 5),
                                    activation='relu'),
@@ -24,13 +32,31 @@ class Model:
             tf.keras.layers.Dense(self.n_classes, activation='sigmoid')
         ])
 
+        self.inception = self.prepare_inception()
+
+    def prepare_inception(self):
+        inception_model = tf.keras.applications.InceptionV3(
+            include_top=True, weights='imagenet', input_tensor=None, input_shape=None,
+            pooling=None, classes=1000, classifier_activation='softmax'
+        )
+        for layer in inception_model.layers:
+            layer.trainable = False
+        # Flatten the output layer to 1 dimension
+        x = tf.keras.layers.Flatten()(inception_model.output)
+        # Add a fully connected layer with 1,024 hidden units and ReLU activation
+        x = tf.keras.layers.Dense(1024, activation='relu')(x)
+        # Add a dropout rate of 0.2
+        x = tf.keras.layers.Dropout(0.2)(x)
+        # Add a final sigmoid layer for classification
+        x = tf.keras.layers.Dense(self.n_classes, activation='sigmoid')(x)
+        return tf.keras.Model(inception_model.input, x)
+
     def train(self, X_train, y_train):
-        epochs = 1
-        batch_size = 512
+        epochs = 5
+        batch_size = 64
         optimizer = tf.keras.optimizers.Adam(learning_rate=0.01, name='Adam')
-        rate = 0.1
-        loss_function = tf.keras.losses.categorical_crossentropy
-        self.LeNet.compile(optimizer='adam', loss=loss_function, metrics=['accuracy'])
+        loss_function = tf.keras.losses.log_cosh
+        self.LeNet.compile(optimizer=optimizer, loss=loss_function, metrics=['accuracy'])
         history = []
         for i in range(0, 3):
             history.append(self.LeNet.fit(x=X_train[:, i],
