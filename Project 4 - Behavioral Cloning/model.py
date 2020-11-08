@@ -9,25 +9,23 @@ class Model:
 
             tf.keras.layers.Cropping2D(cropping=((50, 20), (0, 0))),
 
-            tf.keras.layers.Conv2D(filters=6,
-                                   kernel_size=(5, 5),
-                                   activation='relu',
-                                   strides=(1, 1),
-                                   padding='valid'),
+            tf.keras.layers.Conv2D(filters=24, kernel_size=(5, 5), activation='relu', strides=(1, 1), padding='valid'),
             tf.keras.layers.MaxPooling2D((2, 2)),
 
-            tf.keras.layers.Conv2D(filters=16,
-                                   kernel_size=(5, 5),
-                                   activation='relu'),
+            tf.keras.layers.Conv2D(filters=36, kernel_size=(5, 5), activation='relu'),
             tf.keras.layers.MaxPooling2D((2, 2)),
 
-            tf.keras.layers.Conv2D(filters=16,
-                                   kernel_size=(5, 5),
-                                   activation='relu'),
+            tf.keras.layers.Conv2D(filters=48, kernel_size=(5, 5), activation='relu'),
+            tf.keras.layers.MaxPooling2D((2, 2)),
+
+            tf.keras.layers.Conv2D(filters=64, kernel_size=(1, 1), activation='relu'),
+            tf.keras.layers.MaxPooling2D((2, 2)),
+
+            tf.keras.layers.Conv2D(filters=64, kernel_size=(1, 1), activation='relu'),
             tf.keras.layers.MaxPooling2D((2, 2)),
 
             tf.keras.layers.Flatten(),
-            tf.keras.layers.Dense(120, activation='relu'),
+            tf.keras.layers.Dense(120, activation='relu', kernel_regularizer='l2'),
             tf.keras.layers.Dense(84, activation='relu'),
             tf.keras.layers.Dense(self.n_classes, activation='sigmoid')
         ])
@@ -37,7 +35,7 @@ class Model:
     def prepare_inception(self):
         inception_model = tf.keras.applications.InceptionV3(
             include_top=True, weights='imagenet', input_tensor=None, input_shape=None,
-            pooling=None, classes=1000, classifier_activation='softmax'
+            pooling=None, classes=1000, classifier_activation=None
         )
         for layer in inception_model.layers:
             layer.trainable = False
@@ -53,10 +51,10 @@ class Model:
 
     def train(self, X_train, y_train):
         epochs = 5
-        batch_size = 64
-        optimizer = tf.keras.optimizers.Adam(learning_rate=0.01, name='Adam')
+        batch_size = 32
+        optimizer = tf.keras.optimizers.SGD(learning_rate=0.1, name='SGD')
         loss_function = tf.keras.losses.log_cosh
-        self.LeNet.compile(optimizer=optimizer, loss=loss_function, metrics=['accuracy'])
+        self.LeNet.compile(optimizer=optimizer, loss=loss_function, metrics=['mae'])
         history = []
         for i in range(0, 3):
             history.append(self.LeNet.fit(x=X_train[:, i],

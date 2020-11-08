@@ -16,6 +16,8 @@ from tensorflow.keras.models import load_model
 import h5py
 from tensorflow.keras import __version__ as keras_version
 
+import matplotlib.pyplot as plt
+
 sio = socketio.Server()
 app = Flask(__name__)
 model = None
