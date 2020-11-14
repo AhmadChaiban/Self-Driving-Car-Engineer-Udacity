@@ -3,9 +3,10 @@ from sklearn.metrics import r2_score
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Lambda, Cropping2D, Conv2D, MaxPooling2D, Flatten, \
                                     Dense, Dropout, LayerNormalization
+import matplotlib.pyplot as plt
 
 class Model:
-    def __init__(self):
+    def __init__(self, selected_model):
         self.n_classes = 1
         self.LeNet = Sequential([
             Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160, 320, 3)),
@@ -39,7 +40,7 @@ class Model:
 
             LayerNormalization(epsilon=0.001),
 
-            Conv2D(filters=24, kernel_size=(5, 5), activation='relu', strides=(1, 1), padding='valid'),
+            Conv2D(filters=24, kernel_size=(5, 5), activation='relu', strides=(3, 3), padding='valid'),
             Conv2D(filters=36, kernel_size=(5, 5), activation='relu'),
             Conv2D(filters=48, kernel_size=(5, 5), activation='relu'),
             Conv2D(filters=64, kernel_size=(3, 3), activation='relu'),
@@ -56,6 +57,15 @@ class Model:
         ])
 
         self.inception = self.prepare_inception()
+
+        if selected_model.lower() == 'lenet':
+            self.current_model = self.LeNet
+        elif selected_model.lower() == 'nvidia' or selected_model.lower() is None:
+            self.current_model = self.nvidia
+        elif selected_model.lower() == 'inception':
+            self.selected_model = self.inception
+        else:
+            raise Exception('Please select a valid model: LeNet, Nvidia or Inception')
 
     def prepare_inception(self):
         inception_model = tf.keras.applications.InceptionV3(
@@ -75,28 +85,23 @@ class Model:
         return tf.keras.Model(inception_model.input, x)
 
     def train(self, X_train, y_train):
-        epochs = 5
-        batch_size = 512
+        epochs = 3
+        batch_size = 32
         optimizer = tf.keras.optimizers.SGD(learning_rate=0.1, name='SGD')
         loss_function = tf.keras.losses.log_cosh
-        self.nvidia.compile(optimizer=optimizer, loss=loss_function, metrics=['mae'])
-        history = []
-        for i in range(0, 1):
-            history.append(self.nvidia.fit(x=X_train[:, i],
-                                           y=y_train,
-                                           batch_size=batch_size,
-                                           epochs=epochs,
-                                           validation_split=0.2)
-                           )
+        self.current_model.compile(optimizer=optimizer, loss=loss_function, metrics=['mae'])
+        history = self.current_model.fit(x=X_train,
+                                         y=y_train,
+                                         batch_size=batch_size,
+                                         epochs=epochs,
+                                         validation_split=0.2)
         return history
 
     def test(self, X_test, y_test):
-        scores=[]
-        for i in range(0, 1):
-            y_pred = self.nvidia.predict(X_test[:, i])
-            scores.append(r2_score(y_test, y_pred))
-        print(scores)
-        return scores
+        y_pred = self.current_model.predict(X_test.astype(dtype='float32'))
+        score = r2_score(y_test, y_pred)
+        print(f"r2 Score = {score}")
+        return score
 
     def save(self, path):
-        self.nvidia.save(path)
+        self.current_model.save(path)

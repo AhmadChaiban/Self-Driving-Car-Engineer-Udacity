@@ -6,34 +6,46 @@ from model import Model
 import matplotlib.pyplot as plt
 
 
+def image_setup(path):
+    return cv2.flip(cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2RGB), 1)
+
+
 def load_images(driving_log):
     images = []
+    steering = []
     for index, line in driving_log.iterrows():
 
-        center = cv2.cvtColor(cv2.imread(line['center']), cv2.COLOR_BGR2RGB)
-        left = cv2.cvtColor(cv2.imread(line['right']), cv2.COLOR_BGR2RGB)
-        right = cv2.cvtColor(cv2.imread(line['left']), cv2.COLOR_BGR2RGB)
+        y = line['steering']
 
-        images.append([center, left, right])
-        # images.append(center)
-    return np.array(images), driving_log
+        center = image_setup(line['center'])
+        left = image_setup(line['right'])
+        right = image_setup(line['left'])
+
+        images.append(center)
+        images.append(right)
+        images.append(left)
+
+        steering.append(y)
+        steering.append(y - 0.2)
+        steering.append(y + 0.2)
+    return images, steering
 
 
-def train_test(images, driving_log_images):
+def train_test(image_data, steering_data):
     # y = driving_log_images[['steering', 'throttle', 'brake', 'speed']].to_numpy()
-    y = driving_log_images['steering'].to_numpy()
-    return train_test_split(images, y, test_size=0.25, random_state=42)
+    return train_test_split(np.array(image_data), np.array(steering_data), test_size=0.25, random_state=42)
 
 
 def get_train_test_data(driving_log_path):
     driving_log = pd.read_csv(driving_log_path, sep=',')
-    images, driving_log_images = load_images(driving_log)
-    return train_test(images, driving_log_images)
+    image_data, steering_data = load_images(driving_log)
+    return train_test(image_data, steering_data)
 
 
 if __name__ == '__main__':
-    lenet = Model()
-    X_train, X_test, y_train, y_test = get_train_test_data('./recorded data/Track 1 Lap 2/driving_log.csv')
-    history = lenet.train(X_train, y_train)
-    scores = lenet.test(X_test, y_test)
-    lenet.save('model.h5')
+    # Choices: LeNet, Nvidia, Inception
+    model = Model('nvidia')
+    X_train, X_test, y_train, y_test = get_train_test_data('./recorded data/Track 1 Lap 1/driving_log.csv')
+    history = model.train(X_train, y_train)
+    scores = model.test(X_test, y_test)
+    model.save('model.h5')
