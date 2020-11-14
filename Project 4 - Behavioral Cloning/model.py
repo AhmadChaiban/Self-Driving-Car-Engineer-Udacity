@@ -87,7 +87,7 @@ class Model:
     def train(self, X_train, y_train):
         epochs = 3
         batch_size = 32
-        optimizer = tf.keras.optimizers.SGD(learning_rate=0.1, name='SGD')
+        optimizer = tf.keras.optimizers.Adam(learning_rate=1, name='adam')
         loss_function = tf.keras.losses.log_cosh
         self.current_model.compile(optimizer=optimizer, loss=loss_function, metrics=['mae'])
         history = self.current_model.fit(x=X_train,
