@@ -18,17 +18,17 @@ def load_images(driving_log):
 
         y = line['steering']
 
-        center = image_setup(line['center'].replace(' ', ''))
-        left = image_setup(line['right'].replace(' ', ''))
-        right = image_setup(line['left'].replace(' ', ''))
+        center = image_setup(line['center'])
+        left = image_setup(line['right'])
+        right = image_setup(line['left'])
 
         images.append(center)
         images.append(right)
         images.append(left)
 
-        steering.append(y)
-        steering.append(y - 0.2)
-        steering.append(y + 0.2)
+        steering.append(y * -1.0)
+        steering.append((y - 0.2) * -1.0)
+        steering.append((y + 0.2) * -1.0)
     return images, steering
 
 
@@ -46,7 +46,7 @@ def get_train_test_data(driving_log_path):
 if __name__ == '__main__':
     # Choices: LeNet, Nvidia, Inception
     model = Model('nvidia')
-    X_train, X_test, y_train, y_test = get_train_test_data('./udacity data/driving_log.csv')
+    X_train, X_test, y_train, y_test = get_train_test_data('./recorded data/Track 1 Lap 2/driving_log.csv')
     history = model.train(X_train, y_train)
     scores = model.test(X_test, y_test)
     model.save('model.h5')
