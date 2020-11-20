@@ -45,6 +45,8 @@ class Model:
             Conv2D(filters=48, kernel_size=(5, 5), activation='relu'),
             Conv2D(filters=64, kernel_size=(3, 3), activation='relu'),
             Conv2D(filters=64, kernel_size=(3, 3), activation='relu'),
+            # Extra Layer
+            Conv2D(filters=64, kernel_size=(3, 3), activation='relu'),
 
             Flatten(),
 
@@ -52,7 +54,7 @@ class Model:
             Dense(100, activation='relu'),
             Dense(50, activation='relu'),
             Dense(10, activation='relu'),
-            Dense(self.n_classes, activation='sigmoid')
+            Dense(self.n_classes)
 
         ])
 
@@ -84,12 +86,10 @@ class Model:
         x = Dense(self.n_classes, activation='sigmoid')(x)
         return tf.keras.Model(inception_model.input, x)
 
-    def train(self, X_train, y_train):
-        epochs = 3
-        batch_size = 32
-        optimizer = tf.keras.optimizers.Adam(learning_rate=1, name='adam')
+    def train(self, X_train, y_train, epochs=5, batch_size=512):
+        # optimizer = tf.keras.optimizers.Adam(learning_rate=0.1, name='adam')
         loss_function = tf.keras.losses.log_cosh
-        self.current_model.compile(optimizer=optimizer, loss=loss_function, metrics=['mae'])
+        self.current_model.compile(optimizer='adam', loss='mse', metrics=['mae'])
         history = self.current_model.fit(x=X_train,
                                          y=y_train,
                                          batch_size=batch_size,
