@@ -29,8 +29,17 @@ Which were combined in order to train the model to readjust its driving if it st
 
 <h2 style="color: #3a87ad">Preprocessing</h2>
 
-First, the images and their respective training angles were 
+First, the images and their respective training angles were collected, adding a correction 
 
 <h2 style="color: #3a87ad">nVidia Network</h2>
 
+<center><img src="./image_docs/cnn-architecture-624x890.png"/></center> 
+<br>
+
+I added an additional layer to the network
+
 <h2 style="color: #3a87ad">Results</h2>
+
+Check out the video
+
+<h2 style="color: #3a87ad">File Structure and Usage</h2>
