@@ -81,8 +81,7 @@ self.nvidia = Sequential([
 
 The results of this network on track 1 can be found in track1_video.mp4. It responded well to the track's turns and made 
 minimal mistakes while navigating. Here is a link to the video as well.
-    
-<iframe width="560" height="315" src="https://www.youtube.com/embed/Lu4OtC9Xvm0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 [![Alt text](https://img.youtube.com/vi/Lu4OtC9Xvm0/0.jpg)](https://www.youtube.com/watch?v=Lu4OtC9Xvm0)
 
 
