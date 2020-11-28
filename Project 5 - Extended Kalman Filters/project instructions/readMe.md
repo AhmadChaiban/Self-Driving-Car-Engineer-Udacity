@@ -395,4 +395,50 @@ To complete the project, you only need the files in the github repo; however, we
 
 * A visualization package that you can also find within <a href="https://github.com/udacity/CarND-Mercedes-SF-Utilities" target="_blank">the Sensor Fusion utilities repo</a>
 
+## Running the project in your local machine
+
+1. Clone/fork the project's template files from <a href="https://github.com/udacity/CarND-Extended-Kalman-Filter-Project" target="_blank">the project repository</a>. (Note: Please do not submit your project as a pull request against our repo!)
+2. Read the repo's <a href="https://github.com/udacity/CarND-Extended-Kalman-Filter-Project/blob/master/README.md" target="_blank">README</a> for more detailed instructions.
+3. Clone the visualization and data generation utilities from the <a href="https://github.com/udacity/CarND-Mercedes-SF-Utilities" target="_blank">utilities repository</a>.
+4. Build an Extended Kalman Filter by applying the general processing flow as described in the previous lessons.
+5. Ensure that your project compiles.
+    * From the root of the repo: 
+        1. mkdir build && cd build
+        2. cmake .. && make
+        3. ./ExtendedKF
+6. Test your code using the simulator!
+7. Check your project against the <a href="https://review.udacity.com/#!/rubrics/748/view" target="_blank">project rubric</a>. Make sure your RMSE values satisfy the thresholds listed in the rubric!
+8. Submit your project for review. Be sure to include all files necessary to compile and run your project, including the CMakeLists.txt file.
+
+## Download Link for EKF Simulator
+The EKF project was previously part of Term 2, so please download the <a href="https://github.com/udacity/self-driving-car-sim/releases/" target="_blank">Term 2 Simulator Release.</a>
+
+## Running the Program
+
+1. Download the simulator and open it. In the main menu screen select Project 1/2 EKF and UKF.
+
+2. Once the scene is loaded you can hit the START button to observe how the object moves and how measurement markers are positioned in the data set. Also for more experimentation, "Data set 2" is included which is a reversed version of "Data set 1", also the second data set starts with a radar measurement where the first data set starts with a lidar measurement. At any time you can press the PAUSE button, to pause the scene or hit the RESTART button to reset the scene. Also, the ARROW KEYS can be used to move the camera around, and the top left ZOOM IN/OUT buttons can be used to focus the camera. Pressing the ESCAPE KEY returns to the simulator main menu.
+
+3. The <a href="https://github.com/udacity/CarND-Extended-Kalman-Filter-Project" target="_blank">EKF project Github repository README</a> has more detailed instructions for installing and using c++ uWebScoketIO.
+
+### NOTES:
+
+* Currently hitting Restart or switching between data sets only refreshes the simulator state and not the Kalman Filter's saved results. The current procedure for refreshing the Kalman Filter is to close the connection, ctrl+c and reopen it, ./ExtendedKF. If you don't do this when trying to run a different data set or running the same data set multiple times in a row, the RMSE values will become large because of the previous different filter results still being observed in memory.
+* The two functions in tools.cpp need to be implemented for the simulator to avoid throwing a segmentation fault - make sure to get those built out in order to test in the simulator!
+* Students have reported rapid expansion of log files when using the term 2 simulator. This appears to be associated with not being connected to uWebSockets. If this does occur, please make sure you are connected to uWebSockets. The following workaround may also be effective at preventing large log files.
+
+    * create an empty log file
+    * remove write permissions so that the simulator can't write to log
+
+## Project submission
+Check your project against the project rubric. Make sure your RMSE values satisfy the thresholds listed in the rubric!
+
+Once you are ready to submit go to the last item in this lesson and submit your project, make sure you include all the files necessary to compile and run your project!
+
+## Problems with setup in your local machine?
+Make sure to review the next lessons if you face any problem while preparing your local setup.
+
+## Project Support
+If you are stuck or having difficulties with the project, don't lose hope! Remember to talk to your mentors and fellow students in your Study Group, as well as ask (and answer!) questions on Knowledge tagged with the project name. We also have a previously recorded project Q&A that you can watch here!
+
 
