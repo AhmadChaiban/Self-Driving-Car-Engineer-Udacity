@@ -441,4 +441,36 @@ Make sure to review the next lessons if you face any problem while preparing you
 ## Project Support
 If you are stuck or having difficulties with the project, don't lose hope! Remember to talk to your mentors and fellow students in your Study Group, as well as ask (and answer!) questions on Knowledge tagged with the project name. We also have a previously recorded project Q&A that you can watch here!
 
+## uWebSocketIO Starter Guide
+This project involve using an open source package called uWebSocketIO. This package facilitates the same connection between the simulator and code that was used in the Term 1 Behavioral Cloning Project, but now with C++. The package does this by setting up a web socket server connection from the C++ program to the simulator, which acts as the host. In the project repository there are two scripts for installing uWebSocketIO - one for Linux and the other for macOS.
 
+Note: Only uWebSocketIO branch e94b6e1, which the scripts reference, is compatible with the package installation.
+
+## Linux Installation:
+From the project repository directory run the script: install-ubuntu.sh
+
+## Mac Installation:
+From the project repository directory run the script: install-mac.sh
+
+Some users report needing to use cmakepatch.txt which is automatically referenced and is also located in the project repository directory.
+
+## Windows Installation
+Although it is possible to install uWebSocketIO to native Windows, the process is quite involved. Instead, you can use one of several Linux-like environments on Windows to install and run the package.
+
+## Bash on Windows
+One of the newest features to Windows 10 users is an Ubuntu Bash environment that works great and is easy to setup and use. Here is a nice step by step guide for setting up the utility.
+
+We recommend using the newest version of Ubunut Bash 16.04, which is able to run the install-ubuntu.sh script without complications. The link here can help you check which version of Ubuntu Bash you are running, and also help you upgrade if you need to.
+
+## Mac env setup
+For most instances of missing packages and messages regarding uWebsockets, refer to Linux and Windows troubleshooting. Below are some common issues and their solutions.
+
+* .sh files not recognized on run: Try chmod a+x <filename.sh> for example chmod a+x install-mac.sh
+* missing openssl, libuv, or cmake: install-mac.sh contains the line brew install openssl libuv cmake, which will not execute properly if homebrew is not installed. To determine if homebrew is installed, execute which brew in a terminal. If a path returns it is installed, otherwise you see brew not found. Follow the guidance here to install homebrew, then try running install-mac.sh again.
+* If the step above does not resolve issues regarding openssl, please try the guidance provided this Knowledge post (scroll down to Set-up for Mac portion).
+* Issues with rootless mode in recent versions of OSx: Some recent versions of OSx have a rootless mode by default that cause some install script commands to fail, even when running as root or sudo. To disable this reboot in recovery mode (command+R), and execute csrutil disable in a terminal. After this is complete, try running the install script.
+
+After following these steps there may be some messages regarding makefile not found or can't create symbolic link to websockets. There is likely nothing wrong with the installation. Before doing any other troubleshooting make sure that build steps (10 and 11 from Windows and Linux instructions) have been executed from the top level of the project directory, then test the installation using running the code (step 12 from Windows and Linux instructions).
+
+Tip regarding port forwarding when running code on vm and simulator on host
+When using a virtual machine and running the simulator on the host machine, it is critical to set up port forwarding, as described here.
