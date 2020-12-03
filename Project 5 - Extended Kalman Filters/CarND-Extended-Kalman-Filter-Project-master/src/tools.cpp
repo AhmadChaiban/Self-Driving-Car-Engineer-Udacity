@@ -4,6 +4,8 @@
 using Eigen::VectorXd;
 using Eigen::MatrixXd;
 using std::vector;
+using std::cout;
+using std::endl;
 
 Tools::Tools() {}
 
@@ -12,20 +14,28 @@ Tools::~Tools() {}
 VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
                               const vector<VectorXd> &ground_truth) {
 
-   VectorXd rmse = VectorXd(4);
-   if (estimations.size() != ground_truth.size()
-        || estimations.size() == 0) {
-      cout << "Invalid estimation or ground_truth data" << endl;
-      return rmse;
-    }
+     VectorXd rmse(4);
+     rmse << 0, 0, 0, 0;
+     if (estimations.size() != ground_truth.size()) {
+        cout << "Invalid estimation or ground_truth data" << endl;
+        return rmse;
+      }
 
-    // accumulate squared residuals
+     if(estimations.size() == 0){
+        cout << "No Estimations" << endl;
+        return rmse;
+      }
+
+      if(ground_truth.size() == 0){
+        cout << "No Ground Truth" << endl;
+        return rmse;
+      }
+
+
+      // accumulate squared residuals
     for (unsigned int i=0; i < estimations.size(); ++i) {
-
       VectorXd residual = estimations[i] - ground_truth[i];
-
-      // coefficient-wise multiplication
-      residual = residual.array()*residual.array();
+      residual = residual.array() * residual.array();
       rmse += residual;
     }
 
@@ -35,6 +45,8 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
     // calculate the squared root
     rmse = rmse.array().sqrt();
 
+    cout << rmse << endl;
+
     return rmse;
 }
 
@@ -43,6 +55,11 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
    * Calculate a Jacobian here.
    */
    MatrixXd Hj(3,4);
+
+  if (x_state.size() != 4){
+    cout << "State vector not of size 4" << endl;
+    return Hj;
+  }
    // recover state parameters
    float px = x_state(0);
    float py = x_state(1);
@@ -62,8 +79,8 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
 
    // compute the Jacobian matrix
    Hj << (px/c2), (py/c2), 0, 0,
-       -(py/c1), (px/c1), 0, 0,
-       py*(vx*py - vy*px)/c3, px*(px*vy - py*vx)/c3, px/c2, py/c2;
+        -(py/c1), (px/c1), 0, 0,
+         py*(vx*py - vy*px)/c3, px*(px*vy - py*vx)/c3, px/c2, py/c2;
 
    return Hj;
 
