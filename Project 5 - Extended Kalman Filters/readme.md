@@ -35,6 +35,6 @@ cmake .. && make
 The following run was observed, satisfying the rmse < [0.11, 0.11, 0.52, 0.52] threshold. 
 
 <center>
-    <img src="./doc_images/gif_result.gif" height="500" width="1200"/>
+    <img src="./doc_images/gif_result.gif" height="600" width="1200"/>
 </center>
 
