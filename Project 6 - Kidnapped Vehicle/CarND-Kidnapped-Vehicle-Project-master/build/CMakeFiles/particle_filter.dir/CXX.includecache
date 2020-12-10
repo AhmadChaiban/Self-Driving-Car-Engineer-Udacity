@@ -1,0 +1,56 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/ahmadchaiban/Desktop/Personal/Personal Projects/Self-Driving-Car-Engineer-Udacity/Project 6 - Kidnapped Vehicle/CarND-Kidnapped-Vehicle-Project-master/src/helper_functions.h
+math.h
+-
+fstream
+-
+sstream
+-
+string
+-
+vector
+-
+map.h
+/Users/ahmadchaiban/Desktop/Personal/Personal Projects/Self-Driving-Car-Engineer-Udacity/Project 6 - Kidnapped Vehicle/CarND-Kidnapped-Vehicle-Project-master/src/map.h
+
+/Users/ahmadchaiban/Desktop/Personal/Personal Projects/Self-Driving-Car-Engineer-Udacity/Project 6 - Kidnapped Vehicle/CarND-Kidnapped-Vehicle-Project-master/src/map.h
+vector
+-
+
+/Users/ahmadchaiban/Desktop/Personal/Personal Projects/Self-Driving-Car-Engineer-Udacity/Project 6 - Kidnapped Vehicle/CarND-Kidnapped-Vehicle-Project-master/src/particle_filter.cpp
+particle_filter.h
+/Users/ahmadchaiban/Desktop/Personal/Personal Projects/Self-Driving-Car-Engineer-Udacity/Project 6 - Kidnapped Vehicle/CarND-Kidnapped-Vehicle-Project-master/src/particle_filter.h
+math.h
+-
+algorithm
+-
+iostream
+-
+iterator
+-
+numeric
+-
+random
+-
+string
+-
+vector
+-
+helper_functions.h
+/Users/ahmadchaiban/Desktop/Personal/Personal Projects/Self-Driving-Car-Engineer-Udacity/Project 6 - Kidnapped Vehicle/CarND-Kidnapped-Vehicle-Project-master/src/helper_functions.h
+
+/Users/ahmadchaiban/Desktop/Personal/Personal Projects/Self-Driving-Car-Engineer-Udacity/Project 6 - Kidnapped Vehicle/CarND-Kidnapped-Vehicle-Project-master/src/particle_filter.h
+string
+-
+vector
+-
+helper_functions.h
+/Users/ahmadchaiban/Desktop/Personal/Personal Projects/Self-Driving-Car-Engineer-Udacity/Project 6 - Kidnapped Vehicle/CarND-Kidnapped-Vehicle-Project-master/src/helper_functions.h
+
