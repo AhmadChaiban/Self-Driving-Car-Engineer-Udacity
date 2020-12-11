@@ -59,5 +59,5 @@ Notice that the green laser sensors from the car nearly overlap the blue laser s
 that the particle transition calculations were done correctly.
 
 <center>
-    <img src="docs/result.gif"/>
+    <img src="docs/result_2.gif"/>
 </center>
