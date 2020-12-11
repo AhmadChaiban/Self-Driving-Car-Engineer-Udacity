@@ -33,7 +33,7 @@ void ParticleFilter::init(double x, double y, double theta, double std[]) {
    * NOTE: Consult particle_filter.h for more information about this method 
    *   (and others in this file).
    */
-    num_particles = 51;
+    num_particles = 100;
     particles.reserve(num_particles);
 
     normal_distribution<double> dist_x(0, std[0]);
@@ -130,10 +130,26 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
     for(int i=0; i<particles.size(); i++) {
         vector <LandmarkObs> predictions;
 
-        for (int j = 0; j < map_landmarks.landmark_list.size(); j++) {
-            float l_x = map_landmarks.landmark_list[j].x_f;
-            float l_y = map_landmarks.landmark_list[j].y_f;
-            int l_id = map_landmarks.landmark_list[j].id_i;
+        vector<LandmarkObs> nearby_landmarks;
+        LandmarkObs nearby_landmark;
+
+        vector<Map::single_landmark_s> landmarks = map_landmarks.landmark_list;
+
+        for(unsigned int k=0; k<landmarks.size(); ++k){
+            double landmark_dist = dist(particles[i].x, particles[i].y, landmarks[k].x_f, landmarks[k].y_f);
+
+            if(landmark_dist < sensor_range){
+                nearby_landmark.id = landmarks[k].id_i;
+                nearby_landmark.x = landmarks[k].x_f;
+                nearby_landmark.y = landmarks[k].y_f;
+                nearby_landmarks.push_back(nearby_landmark);
+            }
+        }
+
+        for (int j = 0; j < nearby_landmarks.size(); j++) {
+            float l_x = nearby_landmarks[j].x;
+            float l_y = nearby_landmarks[j].y;
+            int l_id = nearby_landmarks[j].id;
 
             if (fabs(l_x - particles[i].x) <= sensor_range && fabs(l_y - particles[i].y) <= sensor_range) {
 
