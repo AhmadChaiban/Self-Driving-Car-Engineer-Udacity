@@ -154,4 +154,83 @@ vector<double> getXY(double s, double d, const vector<double> &maps_s,
   return {x,y};
 }
 
+double get_check_car_s(vector<double> sensor_fusion, int prev_size){
+    double vx = sensor_fusion[3];
+    double vy = sensor_fusion[4];
+    double check_speed = sqrt(vx*vx + vy*vy);
+    double check_car_s = sensor_fusion[5];
+    check_car_s += ((double)prev_size * 0.02 * check_speed);
+    return check_car_s;
+}
+
+
+int lane_changer(double car_s, vector<vector<double>> sensor_fusion, double d, int lane, int prev_size){
+    bool car_in_left_lane = false;
+    bool car_in_mid_lane = false;
+    bool car_in_right_lane = false;
+    if(lane == 1) {
+        for (int i = 0; i < sensor_fusion.size(); i++) {
+            float d = sensor_fusion[i][6];
+            if (d < 4 && d > 0) {
+                double check_car_s = get_check_car_s(sensor_fusion[i], prev_size);
+                if ((check_car_s - car_s < 30) && (check_car_s - car_s > -10)) {
+                    car_in_left_lane = true;
+                }
+            }
+            else if (d < 12 && d > 8) {
+                double check_car_s = get_check_car_s(sensor_fusion[i], prev_size);
+                if ((check_car_s - car_s < 30) && (check_car_s - car_s > -10)) {
+                    car_in_right_lane = true;
+                }
+            }
+        }
+        if (car_in_left_lane && car_in_right_lane) {
+            return lane;
+        }
+        else if(car_in_left_lane){
+            return 2;
+        }
+        else if(car_in_right_lane){
+            return 0;
+        }
+        else{
+            return 0;
+        }
+    }
+    else if(lane == 0){
+        for (int i = 0; i < sensor_fusion.size(); i++) {
+            float d = sensor_fusion[i][6];
+            if(d < 8 && d > 4){
+                double check_car_s = get_check_car_s(sensor_fusion[i], prev_size);
+                if((check_car_s - car_s < 30) && (check_car_s - car_s > -10)){
+                    car_in_mid_lane = true;
+                }
+            }
+        }
+        if (car_in_mid_lane) {
+            return lane;
+        }
+        else {
+            return 1;
+        }
+    }
+    else if(lane == 2) {
+        for (int i = 0; i < sensor_fusion.size(); i++) {
+            float d = sensor_fusion[i][6];
+            if(d < 8 && d > 4){
+                double check_car_s = get_check_car_s(sensor_fusion[i], prev_size);
+                if((check_car_s - car_s < 30) && (check_car_s - car_s > -10)){
+                    car_in_mid_lane = true;
+                }
+            }
+        }
+        if (car_in_mid_lane) {
+            return lane;
+        }
+        else {
+            return 1;
+        }
+    }
+}
+
 #endif  // HELPERS_H

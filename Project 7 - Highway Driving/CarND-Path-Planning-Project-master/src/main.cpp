@@ -106,16 +106,14 @@ int main() {
               if(d < (2+4*lane+2) && d > (2+4*lane-2)){
                   double vx = sensor_fusion[i][3];
                   double vy = sensor_fusion[i][4];
-                  double check_speed = sqrt(vx*vx - vy*vy);
+                  double check_speed = sqrt(vx*vx + vy*vy);
                   double check_car_s = sensor_fusion[i][5];
 
                   check_car_s += ((double)prev_size * 0.02 * check_speed);
                   if((check_car_s > car_s) && (check_car_s - car_s < 30)){
                       // ref_vel = 29.5;
                       too_close = true;
-                      if(lane > 0){
-                          lane = 0;
-                      }
+                      lane = lane_changer(car_s, sensor_fusion, d, lane, prev_size);
                   }
 
               }
@@ -218,18 +216,6 @@ int main() {
               next_y_vals.push_back(y_point);
 
           }
-//
-//          double dist_inc = 0.3;
-//          for (int i = 0; i < 50; ++i) {
-//
-//              double next_s = car_s + (i+1) * dist_inc;
-//              double next_d = 6.0;
-//
-//              vector<double> next_x_y = getXY(next_s, next_d, map_waypoints_s, map_waypoints_x, map_waypoints_y);
-//
-//              next_x_vals.push_back(next_x_y[0]+(dist_inc*i)*cos(deg2rad(car_yaw)));
-//              next_y_vals.push_back(next_x_y[1]+(dist_inc*i)*sin(deg2rad(car_yaw)));
-//          }
 
           json msgJson;
 
