@@ -55,8 +55,8 @@ road, it begins to lane change (or attempt to do so). The following images outli
 
 <br>
 
-<center>
+<p align="center">
  <img src="docs/output2.gif"/>
  <img src="docs/output1.gif"/>
-</center>
+</p>
 
