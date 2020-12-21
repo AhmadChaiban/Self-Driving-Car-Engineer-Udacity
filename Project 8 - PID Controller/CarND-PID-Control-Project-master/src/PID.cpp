@@ -4,6 +4,7 @@
 #include <string>
 #include "json.hpp"
 #include <uWS/uWS.h>
+#include <ctime>
 using namespace std;
 
 PID::PID() {}
@@ -78,61 +79,68 @@ double PID::TotalError() {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PID::Twiddle(double tolerance, double cte, uWS::WebSocket<uWS::SERVER> ws, std::string s){
-    //Parameter optimization
-    double best_err;
-    std::vector<double> p = {0.0, 0.0, 0.0};
-    std::vector<double> dp = {1.0, 1.0, 1.0};
-    Run(w, s)
-    best_err = err_sum;
-    while(accumulate(dp.begin(), dp.end(), 0.0) > tolerance){
-        for(int i=0; i<p.size(); i++){
-            p[i] += dp[i];
-            if(err_sum < best_err){
-                best_err = err_sum;
-                dp[i] *= 1.1;
-            }
-            else{
-                p[i] -= 2.0 * dp[i];
-                if(err_sum < best_err){
-                    best_err = err_sum;
-                    dp[i] *= 1.1;
-                }
-                else{
-                    p[i] += dp[i];
-                    dp[i] *= 0.9;
-                }
-            }
-
-        }
-    }
-    Kp = p[0]; Kd = p[1]; Ki = p[2];
-    std::cout << "Kp = " << Kp << ", Kd = " << Kd << ", Ki = " << Ki << std::endl;
-}
-
-void PID::ResetCar(uWS::WebSocket<uWS::SERVER> ws){
-    nlohmann::json msgJson;
-    auto msg = "42[\"reset\",{}]";
-    ws.send(msg, uWS::OpCode::TEXT);
-}
-
-void PID::MoveCar(uWS::WebSocket<uWS::SERVER> ws, std::string s){
-    nlohmann::json msgJson;
-    double steer_value = CalculateSteer();
-    msgJson["steering_angle"] = steer_value;
-    msgJson["throttle"] = 0.3;
-    auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-    ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
-
-    auto j = nlohmann::json::parse(s);
-    double cte = std::stod(j[1]["cte"].get<string>());
-    UpdateError(cte);
-    TotalError();
-}
-
-void PID::Run(uWS::WebSocket<uWS::SERVER> ws, std::string s){
-    for(int j=0; j<100000000; j++){
-        MoveCar(ws, s);
-    }
-    ResetCar(ws);
-}
+//void PID::Twiddle(double tolerance, double cte, uWS::WebSocket<uWS::SERVER> ws, std::string s){
+//    //Parameter optimization
+//    double best_err;
+//    std::vector<double> p = {0.0, 0.0, 0.0};
+//    std::vector<double> dp = {1.0, 1.0, 1.0};
+//    Run(ws, s);
+//    best_err = err_sum;
+//    while(accumulate(dp.begin(), dp.end(), 0.0) > tolerance){
+//        for(int i=0; i<p.size(); i++){
+//            p[i] += dp[i];
+//            Run(ws, s);
+//            if(err_sum < best_err){
+//                best_err = err_sum;
+//                dp[i] *= 1.1;
+//            }
+//            else{
+//                p[i] -= 2.0 * dp[i];
+//                Run(ws, s);
+//                if(err_sum < best_err){
+//                    best_err = err_sum;
+//                    dp[i] *= 1.1;
+//                }
+//                else{
+//                    p[i] += dp[i];
+//                    dp[i] *= 0.9;
+//                }
+//            }
+//
+//        }
+//    }
+//    Kp = p[0]; Kd = p[1]; Ki = p[2];
+//    std::cout << "Kp = " << Kp << ", Kd = " << Kd << ", Ki = " << Ki << std::endl;
+//}
+//
+//void PID::ResetCar(uWS::WebSocket<uWS::SERVER> ws){
+//    nlohmann::json msgJson;
+//    auto msg = "42[\"reset\",{}]";
+//    ws.send(msg, uWS::OpCode::TEXT);
+//}
+//
+//void PID::MoveCar(uWS::WebSocket<uWS::SERVER> ws, std::string s){
+//    nlohmann::json msgJson;
+//    double steer_value = CalculateSteer();
+//    msgJson["steering_angle"] = steer_value;
+//    msgJson["throttle"] = 1.0;
+//    auto msg = "42[\"steer\"," + msgJson.dump() + "]";
+//    ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+//
+//    auto j = nlohmann::json::parse(s);
+//    double cte = std::stod(j[1]["cte"].get<string>());
+//    UpdateError(cte);
+//    TotalError();
+//}
+//
+//void PID::Run(uWS::WebSocket<uWS::SERVER> ws, std::string s){
+//    std::time_t start, finish;
+//    time(&start);
+//    time(&finish);
+//    while(std::difftime(finish, start) < 40){
+//        MoveCar(ws, s);
+//        time(&finish);
+//        std::cout << std::difftime(finish, start) << std::endl;
+//    }
+//    ResetCar(ws);
+//}

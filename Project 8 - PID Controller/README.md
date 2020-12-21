@@ -25,14 +25,22 @@ The coefficients `Kp`, `Ki` and `Kd` were tuned in the through the process outli
 In order to tune the PID model, a Twiddle function was built that commands the websocket, however, it was not completed
 but gave some insight into the parameter changes. The final parameters were selected through brute force after that point. 
 
-The parameters did work as expected. After running some experiments on each parameters individually and in selected 
-combinations, a slightly large `Kp` and `Kd` would overshoot slightly, as studied in the classroom. Finally, 
-the following values were selected. 
+The parameters did work as expected. After running some experiments on each parameters individually and selected 
+combinations, the `Kp` parameter alone would make the car oscillate too much for a straight steady drive. Therefore, 
+adding a fairly large `Kd` counteracts that oscillation. This is outlined in the following image taken from the 
+classroom lesson. 
+
+<p align="center">
+    <img src="docs/pid.png"/>
+</p>
+
+`Ki` was set to 0 since there was no noticeable bias in the simulator car model. The following are the final parameters
+that were selected. 
 
 ```c++
 Kp = 0.15;
-Ki = 0.00000000000000000001; //Enough to keep from overshooting
-Kd = 2.5;
+Ki = 0.0;
+Kd = 12.5;
 ```
 
 This selection of parameters performed well, and the results are outlined below. 
@@ -59,7 +67,8 @@ The files that contain the code for the project are located in src, and are comp
 The following was the result of the selected PID coefficients. 
 
 <p align="center">
-    <a href="http://www.youtube.com/watch?v=jKtPnZ0iBoU" target="_blank">
-        <img src="http://img.youtube.com/vi/jKtPnZ0iBoU/0.jpg"/>
+    <a href="http://www.youtube.com/watch?v=l_teB6TTlGY" target="_blank">
+        <img src="http://img.youtube.com/vi/l_teB6TTlGY/0.jpg"/>
     </a>
 </p>
+
