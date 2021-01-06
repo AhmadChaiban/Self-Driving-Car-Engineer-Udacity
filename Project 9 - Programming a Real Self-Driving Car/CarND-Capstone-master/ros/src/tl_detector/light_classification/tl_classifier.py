@@ -2,10 +2,15 @@ import tensorflow as tf
 import numpy as np
 from matplotlib import pyplot as plt
 from PIL import Image
+import cv2
+from styx_msgs.msg import TrafficLight
 
 from object_detection.utils import ops as utils_ops
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
+
+def most_common(lst):
+    return max(set(lst), key=lst.count)
 
 class TLClassifier(object):
     def __init__(self):
@@ -13,9 +18,19 @@ class TLClassifier(object):
         self.num_classes = 3
         self.detection_graph = self.load_model()
         self.img_size = (12, 8)
-        self.label_map = label_map_util.load_labelmap('./label_map.pbtxt')
+        self.label_map = label_map_util.load_labelmap('/home/student/Desktop/CarND-Capstone-master/ros/src/tl_detector/light_classification/label_map.pbtxt')
         self.categories = label_map_util.convert_label_map_to_categories(self.label_map, max_num_classes=self.num_classes, use_display_name=True)
         self.category_index = label_map_util.create_category_index(self.categories)
+        self.current_light = TrafficLight.UNKNOWN
+
+    def class_translation(self, light_state):
+        if light_state == 1:
+            self.current_light = TrafficLight.GREEN
+        elif light_state == 2:
+            self.current_light = TrafficLight.YELLOW
+        elif light_state == 3:
+            self.current_light = TrafficLight.RED
+
 
     def get_classification(self, image):
         """Det::ermines the color of the traffic light in the image
@@ -30,13 +45,18 @@ class TLClassifier(object):
         # implement light color prediction
         image_np = load_image_into_numpy_array(image)
         output_dict = self.infer_single_image(image_np, self.detection_graph)
-        return output_dict['detection_classes'][0]
+
+        light_state = most_common(output_dict['detection_classes'].tolist())
+
+        self.class_translation(light_state)
+
+        return self.current_light
 
     def load_model(self):
         detection_graph = tf.Graph()
         with detection_graph.as_default():
             od_graph_def = tf.GraphDef()
-            with tf.gfile.GFile('./exported-models/frozen_inference_graph.pb', 'rb') as fid:
+            with tf.gfile.GFile('/home/student/Desktop/CarND-Capstone-master/ros/src/tl_detector/light_classification/exported-models/frozen_inference_graph.pb', 'rb') as fid:
                 serialized_graph = fid.read()
                 od_graph_def.ParseFromString(serialized_graph)
                 tf.import_graph_def(od_graph_def, name='')
@@ -71,9 +91,10 @@ class TLClassifier(object):
 
 
 def load_image_into_numpy_array(image):
-    (im_width, im_height) = image.size
-    return np.array(image.getdata()).reshape(
-        (im_height, im_width, 3)).astype(np.uint8)
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # (im_width, im_height, _) = image_rgb.shape
+    # image_np = np.expand_dims(image_rgb, axis=0)
+    return image_rgb
 
 if __name__ == '__main__':
     classifier = TLClassifier()
