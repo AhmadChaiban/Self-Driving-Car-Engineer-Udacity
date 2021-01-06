@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 from PIL import Image
 import cv2
 from styx_msgs.msg import TrafficLight
+import time 
 
 from object_detection.utils import ops as utils_ops
 from object_detection.utils import label_map_util
@@ -23,16 +24,27 @@ class TLClassifier(object):
         self.category_index = label_map_util.create_category_index(self.categories)
         self.current_light = TrafficLight.UNKNOWN
 
-    def class_translation(self, light_state):
-        if light_state == 1:
-            self.current_light = TrafficLight.GREEN
-        elif light_state == 2:
-            self.current_light = TrafficLight.YELLOW
-        elif light_state == 3:
+    def class_translation(self, light_detections, light_boxes):
+        
+        new_idx = []
+        for i in range(len(light_boxes[0])):
+            if any([num!=0.0 for num in light_boxes[0][i]]):
+                new_idx.append(i)
+
+        new_detections = [light_detections[i] for i in new_idx]
+
+        print(new_detections)
+
+        if 3 in new_detections:
             self.current_light = TrafficLight.RED
+        elif 2 in new_detections:
+            self.current_light = TrafficLight.YELLOW
+        else:
+            self.current_light = TrafficLight.GREEN
 
 
     def get_classification(self, image):
+        start_time = time.time()
         """Det::ermines the color of the traffic light in the image
 
         Args:
@@ -46,9 +58,12 @@ class TLClassifier(object):
         image_np = load_image_into_numpy_array(image)
         output_dict = self.infer_single_image(image_np, self.detection_graph)
 
-        light_state = most_common(output_dict['detection_classes'].tolist())
+        light_detections = output_dict['detection_classes']
+        light_boxes = output_dict['detection_boxes']
 
-        self.class_translation(light_state)
+        self.class_translation(light_detections, light_boxes)
+
+        print(time.time() - start_time)
 
         return self.current_light
 
@@ -70,10 +85,7 @@ class TLClassifier(object):
                 all_tensor_names = {
                     output.name for op in ops for output in op.outputs}
                 tensor_dict = {}
-                for key in [
-                    'num_detections', 'detection_boxes', 'detection_scores',
-                    'detection_classes', 'detection_masks'
-                ]:
+                for key in ['detection_boxes', 'detection_classes']:
                     tensor_name = key + ':0'
                     if tensor_name in all_tensor_names:
                         tensor_dict[key] = tf.get_default_graph().get_tensor_by_name(tensor_name)
@@ -106,3 +118,5 @@ if __name__ == '__main__':
     output = classifier.infer_single_image(image_np, classifier.detection_graph)
 
     print(output['detection_classes'])
+    print(output['detection_boxes'])
+    print(len(output['detection_boxes']))
