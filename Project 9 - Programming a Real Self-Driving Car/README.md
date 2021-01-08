@@ -45,5 +45,5 @@ The following are the visual results of the real-time traffic light detection mo
 <img src = "./docs/Light_1.gif">
 </p>
 
-
+Note: I have submitted this project as an individual and not as part of a team. 
 
