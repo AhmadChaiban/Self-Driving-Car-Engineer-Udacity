@@ -12,7 +12,7 @@ YouTube Link to result: https://youtu.be/3O-rvPbK-x0
 
 <h2 style="color:#3a7aad">System Architecture</h2>
 
-For this project, we wrote ROS nodes to implement the core functionality of the autonomous vehicle system, including traffic light detection, control, and waypoint following. The code was tested on a simulator and submitted to run on Carla, Udacity's self-driving car. 
+For this project, I wrote ROS nodes to implement the core functionality of the autonomous vehicle system, including traffic light detection, control, and waypoint following. The code was tested on a simulator and submitted to run on Carla, Udacity's self-driving car. 
 
 The following is a system architecture diagram showing the ROS nodes and topics used in the project.
 
@@ -21,10 +21,6 @@ The following is a system architecture diagram showing the ROS nodes and topics 
 </p>
 
 <h2 style="color:#3a7aad">Project Setup</h2>
-
-The project will require the use of Ubuntu Linux (the operating system of Carla) and a new simulator. To reduce installation difficulties, we have provided an in-browser Workspace for you to work with. You can find instructions for the Workspace and the Workspace itself later in this lesson.
-
-If you prefer not to use the Workspace, follow the steps below to get set up:
 
 Because ROS is used, you will need to use Ubuntu to develop and test your project code. You may use
 
