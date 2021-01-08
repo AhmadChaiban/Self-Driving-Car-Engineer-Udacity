@@ -5,6 +5,7 @@ import sys
 import tarfile
 import tensorflow as tf
 import zipfile
+import cv2
 
 from collections import defaultdict
 from io import StringIO
@@ -97,30 +98,44 @@ def run_inference_for_single_image(image, graph):
                 output_dict['detection_masks'] = output_dict['detection_masks'][0]
     return output_dict
 
+image_array = []
 
-image_path = './images/left0477.jpg'
+for i in range(77):
+    image_path = f'./camera_sequence/light_{i}.jpg'
 
-image = Image.open(image_path)
-# the array based representation of the image will be used later in order to prepare the
-# result image with boxes and labels on it.
-image_np = load_image_into_numpy_array(image)
-# Expand dimensions since the model expects images to have shape: [1, None, None, 3]
-image_np_expanded = np.expand_dims(image_np, axis=0)
-# Actual detection.
-output_dict = run_inference_for_single_image(image_np, detection_graph)
-# Visualization of the results of a detection.
-vis_util.visualize_boxes_and_labels_on_image_array(
-    image_np,
-    output_dict['detection_boxes'],
-    output_dict['detection_classes'],
-    output_dict['detection_scores'],
-    category_index,
-    instance_masks=output_dict.get('detection_masks'),
-    use_normalized_coordinates=True,
-    line_thickness=8)
+    image = Image.open(image_path)
+    # the array based representation of the image will be used later in order to prepare the
+    # result image with boxes and labels on it.
+    image_np = load_image_into_numpy_array(image)
+    # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
+    image_np_expanded = np.expand_dims(image_np, axis=0)
+    # Actual detection.
+    output_dict = run_inference_for_single_image(image_np, detection_graph)
+    # Visualization of the results of a detection.
+    vis_util.visualize_boxes_and_labels_on_image_array(
+        image_np,
+        output_dict['detection_boxes'],
+        output_dict['detection_classes'],
+        output_dict['detection_scores'],
+        category_index,
+        instance_masks=output_dict.get('detection_masks'),
+        use_normalized_coordinates=True,
+        line_thickness=8)
 
-print(output_dict['detection_classes'])
+    image_array.append(image_np)
 
-plt.figure(figsize=IMAGE_SIZE)
-plt.imshow(image_np)
-plt.savefig('result.jpg')
+
+    # print(output_dict['detection_classes'])
+
+    # plt.figure(figsize=IMAGE_SIZE)
+    # plt.imshow(image_np)
+    # plt.savefig('result.jpg')
+
+height, width, layers = image_array[0].shape
+size = (width, height)
+
+out = cv2.VideoWriter('traffic.mp4',cv2.VideoWriter_fourcc(*'DIVX'), 15, size)
+
+for i in range(len(image_array)):
+    out.write(cv2.cvtColor(image_array[i], cv2.COLOR_BGR2RGB))
+out.release()

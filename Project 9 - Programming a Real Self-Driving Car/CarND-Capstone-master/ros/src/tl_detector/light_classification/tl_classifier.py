@@ -5,6 +5,7 @@ from PIL import Image
 import cv2
 from styx_msgs.msg import TrafficLight
 import time 
+import rospy
 
 from object_detection.utils import ops as utils_ops
 from object_detection.utils import label_map_util
@@ -23,8 +24,10 @@ class TLClassifier(object):
         self.categories = label_map_util.convert_label_map_to_categories(self.label_map, max_num_classes=self.num_classes, use_display_name=True)
         self.category_index = label_map_util.create_category_index(self.categories)
         self.current_light = TrafficLight.UNKNOWN
+        self.config = tf.ConfigProto()
+        self.image_counter = 0
 
-    def class_translation(self, light_detections, light_boxes):
+    def class_translation(self, light_detections, light_boxes, image):
         
         new_idx = []
         for i in range(len(light_boxes[0])):
@@ -33,15 +36,26 @@ class TLClassifier(object):
 
         new_detections = [light_detections[i] for i in new_idx]
 
-        print(new_detections)
-
         if 3 in new_detections:
             self.current_light = TrafficLight.RED
+            #self.draw_detection_boxes(image, light_boxes[0], 'RED')
+            rospy.logwarn("DETECTION MADE: Num_detections={}, state={}".format(len(new_idx), "RED"))
+
         elif 2 in new_detections:
             self.current_light = TrafficLight.YELLOW
+            #self.draw_detection_boxes(image, light_boxes[0], 'YELLOW')
+            rospy.logwarn("DETECTION MADE: Num_detections={}, state={}".format(len(new_idx), "YELLOW"))
         else:
             self.current_light = TrafficLight.GREEN
+            #self.draw_detection_boxes(image, light_boxes[0], 'GREEN')
+            rospy.logwarn("DETECTION MADE: Num_detections={}, state={}".format(len(new_idx), "GREEN"))
 
+    def draw_detection_boxes(self, image, boxes, state):
+        for box in boxes:
+            image = cv2.rectangle(image, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (255, 0, 0), 2)
+            image = cv2.putText(image, state, (int(box[0]),int(box[1]-10)) , cv2.FONT_HERSHEY_SIMPLEX , 1, (255, 0, 0), 2, cv2.LINE_AA)
+
+        cv2.imwrite('/home/student/Desktop/CarND-Capstone-master/ros/src/tl_detector/light_classification/camera_sequence/light_' + str(self.image_counter) + '.jpg', image)
 
     def get_classification(self, image):
         start_time = time.time()
@@ -54,16 +68,18 @@ class TLClassifier(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        # implement light color prediction
+        # implement light color prediction        
         image_np = load_image_into_numpy_array(image)
         output_dict = self.infer_single_image(image_np, self.detection_graph)
 
         light_detections = output_dict['detection_classes']
         light_boxes = output_dict['detection_boxes']
 
-        self.class_translation(light_detections, light_boxes)
+        self.class_translation(light_detections, light_boxes, image)
 
-        print(time.time() - start_time)
+        rospy.logwarn("TIME FOR DETECTION ={}".format(time.time() - start_time))
+
+        # self.image_counter += 1
 
         return self.current_light
 
@@ -71,7 +87,7 @@ class TLClassifier(object):
         detection_graph = tf.Graph()
         with detection_graph.as_default():
             od_graph_def = tf.GraphDef()
-            with tf.gfile.GFile('/home/student/Desktop/CarND-Capstone-master/ros/src/tl_detector/light_classification/exported-models/frozen_inference_graph.pb', 'rb') as fid:
+            with tf.gfile.GFile('/home/student/Desktop/CarND-Capstone-master/ros/src/tl_detector/light_classification/converted/frozen_inference_graph.pb', 'rb') as fid:
                 serialized_graph = fid.read()
                 od_graph_def.ParseFromString(serialized_graph)
                 tf.import_graph_def(od_graph_def, name='')
@@ -79,7 +95,7 @@ class TLClassifier(object):
     
     def infer_single_image(self, image, graph):
         with graph.as_default():
-            with tf.Session() as sess:
+            with tf.Session(config=self.config) as sess:
                 # Get handles to input and output tensors
                 ops = tf.get_default_graph().get_operations()
                 all_tensor_names = {
